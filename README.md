@@ -1,9 +1,13 @@
 Leveldbkit
 ==========
 
-A port of a post 0.6 [riakkit](https://github.com/shuhaowu/riakkit) for leveldb.
-For anyone that does not know that, this is basically an ORM that makes leveldb
-slow but easier to program (secondary indices too!!!)
+Leveldbkit is an object mapper that for leveldb that also has secondary indexes!
+This means it adds bloat and complexity to leveldb so use at your own risk!
+
+The API is almost compatible with [riakkit](https://github.com/shuhaowu/riakkit)
+(next generation riakkit only, post version 0.6) so you should be able to
+port your applications really easily if you decided to use riak instead of
+leveldb!
 
 This means that non of the old bloat is here (should they be? let me know).
 Basic features are here and porting your application to riakkit will be really
@@ -75,4 +79,3 @@ Reference
 =========
 
 Again, docstrings will be filled soon!!!! ^_^
-
