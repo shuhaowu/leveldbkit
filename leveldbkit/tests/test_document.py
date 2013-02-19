@@ -39,7 +39,7 @@ class SimpleDocument(Document):
 
 class SomeDocument(Document):
   db = leveldb.LevelDB("{0}/test1.db".format(test_dir))
-  index_dbs = {"test_field": leveldb.LevelDB("{0}/test_index.db".format(test_dir))}
+  index_db = leveldb.LevelDB("{0}/test_index.db".format(test_dir))
 
 class DocumentWithRef(Document):
   db = leveldb.LevelDB("{0}/test2.db".format(test_dir))
@@ -121,7 +121,7 @@ class BasicDocumentTest(unittest.TestCase):
     self.assertEquals(set(), doc2.indexes())
 
     with self.assertRaises(KeyError):
-      SomeDocument.index_dbs["test_field"].Get("test_field")
+      SomeDocument.index_db.Get("test_field~mrrowl")
 
     doc2.reload()
 
