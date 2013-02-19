@@ -33,8 +33,6 @@ from .exceptions import ValidationError, NotFoundError
 
 from leveldb import WriteBatch
 
-# Let's do something gross.
-
 class EmDocumentMetaclass(type):
   def __new__(cls, clsname, parents, attrs):
     if clsname in ("Document", "EmDocument"):
@@ -64,6 +62,12 @@ class EmDocument(object):
   __metaclass__ = EmDocumentMetaclass
 
   def __init__(self, data={}):
+    """Initializes a new EmDocument
+
+    Args:
+      data: A dictionary that's supposed to be initialized with the
+            document as attributes.
+    """
     self.clear()
     self.merge(data)
 
@@ -74,6 +78,15 @@ class EmDocument(object):
     raise AttributeError("Attribute '{0}' not found with '{1}'.".format(name, self.__class__.__name__))
 
   def serialize(self, dictionary=True):
+    """Serializes the object into a dictionary with all the proper conversions
+
+    Args:
+      dictionary: boolean. If True, this will return a dictionary, otherwise the
+                  dictionary will be dumped by json.
+    Returns:
+      A plain dictionary representation of the object after all the conversion
+      to make it json friendly.
+    """
     d = {}
     for name, value in self._data.iteritems():
       if name in self._meta and isinstance(self._meta[name], BaseProperty):
@@ -86,6 +99,19 @@ class EmDocument(object):
     return d if dictionary else json.dumps(d)
 
   def deserialize(self, data):
+    """Deserializes the data. This uses the `from_db` method of all the
+    properties. This differs from `merge` as this assumes that the data is from
+    the database and will convert from db whereas merge assumes the the data
+    is from input and will not do anything to it. (unless the property has
+    `on_set`).
+
+    Args:
+      data: The data dictionary from the database.
+
+    Returns:
+      self, with its attributes populated.
+
+    """
     converted_data = {}
     props_to_load = set()
 
@@ -104,16 +130,34 @@ class EmDocument(object):
 
   @classmethod
   def load(cls, data):
+    """A convenient method that creates an object and deserializes the data.
+
+    Args:
+      data: The data to be deserialized
+
+    Returns:
+      A document with the data deserialized.
+    """
     doc = cls()
     return doc.deserialize(data)
 
   def is_valid(self):
+    """Test if all the attributes pass validation.
+
+    Returns:
+      True or False
+    """
     for name in self._meta:
       if not self._validate_attribute(name):
         return False
     return True
 
   def invalids(self):
+    """Get all the attributes' names that are invalid.
+
+    Returns:
+      A list of attribute names that have invalid values.
+    """
     invalid = []
     for name in self._meta:
       if not self._validate_attribute(name):
@@ -131,6 +175,20 @@ class EmDocument(object):
     return True
 
   def merge(self, data, merge_none=False):
+    """Merge the data from a non-db source.
+    This method will treat all values with `None` as that it doesn't have
+    values unless `merge_none` is True. That is, if a value is None and the key
+    that it is associated to is defined as a property, the default value of that
+    property will be used unless `merge_none == True`.
+
+    Args:
+      data: The data dictionary to merge into the object
+      merge_none: Boolean. If set to True, None values will be merged as is
+                  instead of being converted into the default value of that
+                  property. Defaults to False.
+    Returns:
+      self
+    """
     if isinstance(data, EmDocument):
       data = data._data
     elif isinstance(data, basestring):
@@ -144,6 +202,15 @@ class EmDocument(object):
     return self
 
   def clear(self, to_default=True):
+    """Clears the object. Set all attributes to default or nothing.
+
+    Args:
+      to_default: Boolean. If True, all properties defined will be set to its
+                  default value. Otherwise the document will be empty.
+
+    Returns:
+      self
+    """
     self._data = {}
     self._props_to_load = set()
 
@@ -157,6 +224,13 @@ class EmDocument(object):
     return self
 
   def __setattr__(self, name, value):
+    """Sets the attribute of the object and calls `on_set` of the property
+    if the property is defined and it has an `on_set` method.
+
+    Args:
+      name: name of the attribute
+      value: the value of that attribute to set to.
+    """
     if name[0] == "_":
       self.__dict__[name] = value
       return
@@ -168,6 +242,16 @@ class EmDocument(object):
     self._data[name] = value
 
   def __getattr__(self, name):
+    """Get an attribute from the document.
+    Note that if a property is defined and the value is not set. This will
+    always return None. (Also remember that if a value is not set by you it
+    does not mean that it is not initialized to its default value.)
+
+    Args:
+      name: the name of the attribute.
+    Returns:
+      The value of the attribute.
+    """
     if name in self._data:
       if name in self._props_to_load:
         self._data[name] = self._meta[name].from_db(self._data[name])
@@ -222,6 +306,13 @@ class Document(EmDocument):
 
   @classmethod
   def flush(cls, sync=True, db=None):
+    """Flushes all the batch operations.
+
+    Args:
+      sync: sync argument to pass to leveldb.
+      db: The db to write to. Defaults to the default class database. The index
+          dbs will not be affected.
+    """
     db = db or cls.db
     db.Write(cls._write_batch, sync=sync)
     cls._write_batch = WriteBatch()
@@ -240,6 +331,16 @@ class Document(EmDocument):
     return not self.__eq__(other)
 
   def __init__(self, key=lambda: uuid1().hex, data={}, db=None):
+    """Creates a new instance of a document.
+
+    Args:
+      key: the key to initialize this to. A function that takes no argument
+           is also accepted and it should return the key for this object. This
+           defaults to generating uuid1 as the key.
+      data: The data dictionary to merge to.
+      db: A db other than the class database. However, if you use batch this
+          will be ignored. Defaults to the class db.
+    """
     if callable(key):
       key = key()
 
@@ -253,11 +354,27 @@ class Document(EmDocument):
 
   @classmethod
   def get(cls, key, verify_checksums=False, fill_cache=True, db=None):
+    """Gets a document from the database given a key.
+
+    Args:
+      key: the key to get.
+      verify_checksums: See pyleveldb's documentation
+      fill_cache: See pyleveldb's documentation
+      db: A `leveldb.LevelDB` instance to get from. Defaults to the object/class
+          db.
+    Returns:
+      The document associated with that key.
+    Raises:
+      NotFoundError: when the key is not found in db.
+    """
     doc = cls(key=key, db=db)
     return doc.reload(verify_checksums, fill_cache, db)
 
   @classmethod
   def get_or_new(cls, key, verify_checksums=False, fill_cache=True, db=None):
+    """Gets a document from the database given a key. If not found, create one.
+    Note that this does not actually save.
+    """
     doc = cls(key=key, db=db)
     try:
       return doc.reload(verify_checksums, fill_cache, db)
@@ -296,6 +413,14 @@ class Document(EmDocument):
     return self
 
   def reload(self, verify_checksums=False, fill_cache=True, db=None):
+    """Reloads the document from the database
+
+    Args:
+      verify_checksums: See pyleveldb's documentation
+      fill_cache: See pyleveldb's documentation
+      db: A `leveldb.LevelDB` instance to reload from. Defaults to the
+          object/class db.
+    """
     db = db or self.db
     try:
       value = db.Get(self.key)
@@ -313,6 +438,17 @@ class Document(EmDocument):
     return self
 
   def save(self, sync=True, db=None, batch=False):
+    """Saves the document to the database
+
+    Args:
+      sync: sync argument to pass to leveldb
+      db: The db to save to. defaults to object/class db
+      batch: If this is a batch operation. If True, it will be queued and
+             actually stored when Document.flush (replace Document with your
+             class name) is called. If True, sync and db will be ignored.
+    Returns:
+      self
+    """
     value = self.serialize()
     value["_2i"] = list(self._indexes)
     value = json.dumps(value)
@@ -337,6 +473,17 @@ class Document(EmDocument):
     return self
 
   def delete(self, sync=True, db=None, batch=False):
+    """Deletes the object from the database.
+
+    Args:
+      sync: sync argument to pass to leveldb
+      db: The db to delete from. defaults to object/class db
+      batch: If this is a batch operation. If True, it will be queued and
+             actually deleted when Document.flush (replace Document with your
+             class name) is called. If True, sync and db will be ignored.
+    Returns:
+      self
+    """
     for field, value in self._indexes:
       try:
         keys = json.loads(self.__class__.index_dbs[field].Get(value))
@@ -359,22 +506,55 @@ class Document(EmDocument):
       db = db or self.db
       db.Delete(self.key, sync)
       self._flush_indexes(sync)
+
+    self.clear(False)
     return self
 
   @classmethod
   def delete_key(cls, key, sync=False, db=None, batch=False):
+    """Delete something from the database without loading it.
+
+    Args:
+      key: the key to delete.
+      sync: sync argument to pass to leveldb
+      db: The db to delete from. defaults to object/class db
+      batch: If this is a batch operation. If True, it will be queued and
+             actually deleted when Document.flush (replace Document with your
+             class name) is called. If True, sync and db will be ignored.
+    """
     if batch:
       cls._write_batch.Delete(key)
     else:
       db = db or cls.db
       db.Delete(cls.key, sync)
 
-  def add_index(self, field, value): # TODO: add batch operation
+  def add_index(self, field, value):
+    """Add a secondary index.
+
+    Args:
+      field: the field name of the index
+      value: the value for the index
+    Returns:
+      self
+    Raises:
+      KeyError if `index_dbs` does not have `field` defined
+    """
     self._ensure_index_db_exists(field)
     self._indexes.add((field, value))
     return self
 
   def remove_index(self, field, value=None):
+    """Removes a secondary index.
+
+    Args:
+      field: The field name of the index to remove.
+      value: The value of the index to remove. Defaults to None. If None, then
+             every index with that field from this object will be removed
+             regardless of the value. Otherwise, only the specific one will be
+             removed.
+    Returns:
+      self
+    """
     self._ensure_index_db_exists(field)
     if value is None:
       self._indexes = {(f, v) for f, v in self._indexes if f != field}
@@ -383,12 +563,37 @@ class Document(EmDocument):
     return self
 
   def set_index(self, indexes):
+    """Sets the index. Dangerous.
+
+    Args:
+      indexes: The indexes consisting of a set of (field, value) pairs. No
+               validation is done with this so at this point weird errors may
+               show up. This also doesn't do a copy. So it is entirely your
+               fault if something screws up!
+    Returns:
+      self
+    """
     self._indexes = indexes
+    return self
 
   def index(self, field=None):
+    """Get an index value or all indexes.
+
+    Args:
+      field: Defaults to None. If it is specified, that particular field's
+             values will be returned as a list. Otherwise this returns
+             the set of (field, value) (not a copy! again! So you can modify
+             as you please but it is dangerous)
+    Returns:
+      Either the set of (field, value) (not a copy!!) or a list of all the
+      index values associated to that field.
+    Raises:
+      KeyError if field is not None and field not in cls.index_dbs
+    """
     if field is None:
       return self._indexes
     else:
+      self._ensure_index_db_exists(field)
       return [v for f, v in self._indexes if f == field]
 
   indexes = index
