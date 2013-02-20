@@ -1,0 +1,36 @@
+#!/usr/bin/python
+# This file is part of Riakkit or Leveldbkit
+#
+# Riakkit or Leveldbkit is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Riakkit or Leveldbkit is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Riakkit or Leveldbkit. If not, see <http://www.gnu.org/licenses/>.
+
+if __name__ == "__main__":
+  import os
+  modules = ["leveldbkit"]
+  for root, dirs, files in os.walk(os.getcwd() + "/leveldbkit/"):
+    module = root.split("/leveldbkit/leveldbkit/", 1)[1]
+    if "test" in module:
+      continue
+    if module:
+      modules.append("leveldbkit." + module)
+      module += "."
+    if "__init__.py" not in files:
+      continue
+    for f in files:
+      if not f.startswith("_") and f.endswith(".py"):
+        modules.append("leveldbkit." + module + f[:-3])
+
+  os.system("pydoc -w %s" % " ".join(modules))
+  for module in modules:
+    module += ".html"
+    os.system("mv %s docs/%s" % (module, module))

@@ -56,8 +56,11 @@ Get started
 Installation
 ------------
 
-This library is not yet available on PyPI and it doesn't have a setup file. I'll
-fix that soon enough. Here are the dependencies:
+Install via `$ python setup.py install`. This should take care of dependencies.
+Install the optional dependencies if you'd like to take advantage of those 
+features.
+
+Dependencies if you're just linking in:
 
  1. [leveldb](http://code.google.com/p/leveldb/)
  2. [pyleveldb](http://code.google.com/p/py-leveldb/)
@@ -73,9 +76,9 @@ Optional libraries that this thing tries to use
 Tutorial
 --------
 
-I'll write one once I figure out what to do with indexes and things!
+Will write one when I write an app for it and make this for reals. For now just
+browse through the source code and take a look at the riakkit tutorial (although
+the new version is not out you could see what kinda is the case).
 
 Reference
-=========
-
-Again, docstrings will be filled soon!!!! ^_^
+---------
