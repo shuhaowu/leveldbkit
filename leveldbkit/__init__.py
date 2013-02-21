@@ -19,6 +19,11 @@
 """Top level leveldbkit module"""
 from __future__ import absolute_import
 
+from .document import EmDocument, Document
+from .exceptions import *
+from .properties.standard import BaseProperty, BooleanProperty, DictProperty, EmDocumentProperty, EmDocumentsListProperty, ListProperty, NumberProperty, ReferenceProperty, StringProperty
+from .properties.fancy import EnumProperty, DateTimeProperty, PasswordProperty
+
 # PEP 386 versioning
 VERSION = (0, 1, 0, "a")
 __version__ = ('.'.join(map(str, VERSION[:3])) + '.'.join(VERSION[3:]))
