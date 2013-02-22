@@ -386,6 +386,17 @@ class Document(EmDocument):
 
   @classmethod
   def index_lookup(cls, field, start_value, end_value=None):
+    """Index lookup. Given a field and a value, find the associated document
+
+    Args:
+      field: The field name
+      start_value: the value to look for, or the beginning value for a range
+      end_value: if not None, this is a ranged search, that is, all document with
+                 of field and value between start_value and end_value will be
+                 returned
+    Returns:
+      An iterator through all the documents
+    """
     cls._ensure_index_db_exists()
     if end_value is None:
       try:
