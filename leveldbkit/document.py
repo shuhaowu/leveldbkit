@@ -324,17 +324,13 @@ class Document(EmDocument):
     cls._write_batch = WriteBatch()
     cls._flush_indexes(sync)
 
-  def __hash__(self):
-    return hash((self.key, self.bucket_name, self.vclock))
-
-  def __eq__(self, other):
-    if isinstance(other, self.__class__):
-      return hash(self) == hash(other)
-    else:
-      return False
-
-  def __ne__(self, other):
-    return not self.__eq__(other)
+  @classmethod
+  def reset_write_batch(self):
+    """Empties the current write batch.
+    This means all the current writes are void"""
+    cls._write_batch = WriteBatch()
+    cls._indexdb_write_batch = WriteBatch()
+    cls._index_write_needed = False
 
   def __init__(self, key=lambda: uuid1().hex, data={}, db=None):
     """Creates a new instance of a document.

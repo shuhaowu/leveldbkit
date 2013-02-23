@@ -83,7 +83,29 @@ class BasicDocumentTest(unittest.TestCase):
       doc2.reload()
 
   def test_batch(self):
-    pass
+    doc = SomeDocument()
+    doc.lol = "Yay"
+    doc.save(batch=True)
+    with self.assertRaises(NotFoundError):
+      SomeDocument.get(doc.key)
+
+    SomeDocument.flush()
+    self.cleanups.append(doc)
+
+    samedoc = SomeDocument.get(doc.key)
+    self.assertEquals(doc.key, samedoc.key)
+    self.assertEquals("Yay", doc.lol)
+
+    doc.delete(batch=True)
+
+    docagain = SomeDocument.get(doc.key)
+    self.assertEquals("Yay", docagain.lol)
+
+    SomeDocument.flush()
+
+    with self.assertRaises(NotFoundError):
+      SomeDocument.get(doc.key)
+
 
   def test_reference_document(self):
     doc = SomeDocument()
@@ -150,6 +172,31 @@ class BasicDocumentTest(unittest.TestCase):
 
     _test_keys_only(self, None, "test_str_index", "quack")
     _test_keys_only(self, None, "test_number_index", 1336)
+
+  def test_2i_iterator(self):
+    doc = SomeDocument()
+    doc.test_str_index = "meow"
+    doc.test_number_index = 1337
+    doc.test_list_index = ["hello", "world", 123]
+    doc.save()
+    self.cleanups.append(doc)
+
+    counter = 0
+    for d in SomeDocument.index("test_str_index", "meow"):
+      counter += 1
+      self.assertEquals(doc.key, d.key)
+
+    self.assertEquals(1, counter)
+
+    counter = 0
+    for d in SomeDocument.index("test_list_index", "hello", "world2"):
+      counter += 1
+      self.assertEquals(doc.key, d.key)
+
+    self.assertEquals(2, counter)
+
+  def test_2i_batch(self):
+    pass
 
 if __name__ == "__main__":
   unittest.main()
