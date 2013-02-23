@@ -39,7 +39,11 @@ class SimpleDocument(Document):
 
 class SomeDocument(Document):
   db = leveldb.LevelDB("{0}/test1.db".format(test_dir))
-  index_db = leveldb.LevelDB("{0}/test_index.db".format(test_dir))
+  indexdb = leveldb.LevelDB("{0}/test_index.db".format(test_dir))
+
+  test_str_index = StringProperty(index=True)
+  test_number_index = NumberProperty(index=True)
+  test_list_index = ListProperty(index=True)
 
 class DocumentWithRef(Document):
   db = leveldb.LevelDB("{0}/test2.db".format(test_dir))
@@ -64,6 +68,7 @@ class BasicDocumentTest(unittest.TestCase):
     doc.sr = "lolwut"
     doc.sv = "valid"
     doc.save()
+    self.cleanups.append(doc)
 
     doc2 = SimpleDocument.get(doc.key)
     self.assertEquals(doc.s, doc2.s)
@@ -83,52 +88,67 @@ class BasicDocumentTest(unittest.TestCase):
   def test_reference_document(self):
     doc = SomeDocument()
     doc.save()
+    self.cleanups.append(doc)
 
     doc2 = DocumentWithRef()
     doc2.ref = doc
     doc2.save()
+    self.cleanups.append(doc2)
 
     doc2_copy = DocumentWithRef.get(doc2.key)
     self.assertEquals(doc2.key, doc2_copy.key)
     self.assertEquals(doc.key, doc2_copy.ref.key)
 
-    self.cleanups.append(doc)
-    self.cleanups.append(doc2)
 
-  def test_2i(self):
+  def test_2i_save_delete(self):
     doc = SomeDocument()
-    self.assertEquals(set(), doc.indexes())
-    doc.add_index("test_field", "mrrowl")
-    self.assertEquals(set((("test_field", "mrrowl"),)), doc.indexes())
-    self.assertEquals(["mrrowl"], doc.indexes("test_field"))
+    doc.test_str_index = "meow"
+    doc.test_number_index = 1337
+    doc.test_list_index = ["hello", "world", 123]
+    doc.save()
+    self.cleanups.append(doc)
 
+    def _test_keys_only(self, doc, field, value):
+      keys = SomeDocument.index_keys_only(field, value)
+
+      if doc:
+        self.assertEquals(1, len(keys))
+        self.assertEquals(doc.key, keys[0])
+      else:
+        self.assertEquals(0, len(keys))
+
+    _test_keys_only(self, doc, "test_list_index", "hello")
+    _test_keys_only(self, doc, "test_list_index", "world")
+    _test_keys_only(self, doc, "test_list_index", 123)
+    _test_keys_only(self, doc, "test_str_index", "meow")
+    _test_keys_only(self, doc, "test_number_index", 1337)
+
+    doc.test_str_index = "quack"
+    del doc.test_number_index
+    doc.test_list_index = ["hello", "wut"]
     doc.save()
 
-    doc2 = SomeDocument.get(doc.key)
-    self.assertEquals(set((("test_field", "mrrowl"),)), doc2.indexes())
-    self.assertEquals(["mrrowl"], doc2.indexes("test_field"))
+    _test_keys_only(self, doc, "test_str_index", "quack")
+    _test_keys_only(self, None, "test_str_index", "meow")
+    _test_keys_only(self, doc, "test_number_index", 1336)
+    _test_keys_only(self, None, "test_number_index", 1337)
+    _test_keys_only(self, doc, "test_list_index", "hello")
+    _test_keys_only(self, doc, "test_list_index", "wut")
+    _test_keys_only(self, None, "test_list_index", "world")
+    _test_keys_only(self, None, "test_list_index", 123)
 
-    counter = 0
-    for d in SomeDocument.index_lookup("test_field", "mrrowl"):
-      self.assertEquals(doc2.key, d.key)
-      counter += 1
+    # This is really bad in practise. Divergent copies are bad.
+    samedoc = SomeDocument.get(doc.key)
+    del samedoc.test_list_index
+    samedoc.save()
 
-    self.assertEquals(1, counter)
+    _test_keys_only(self, None, "test_list_index", "hello")
+    _test_keys_only(self, None, "test_list_index", "wut")
 
-    doc2.remove_index("test_field", "mrrowl")
-    doc2.save()
+    samedoc.delete()
 
-    self.assertEquals(set(), doc2.indexes())
-
-    with self.assertRaises(KeyError):
-      SomeDocument.index_db.Get("test_field~mrrowl")
-
-    doc2.reload()
-
-    self.assertEquals(set(), doc2.indexes())
-
-    self.cleanups.append(doc)
-
+    _test_keys_only(self, None, "test_str_index", "quack")
+    _test_keys_only(self, None, "test_number_index", 1336)
 
 if __name__ == "__main__":
   unittest.main()

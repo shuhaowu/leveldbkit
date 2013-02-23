@@ -419,45 +419,40 @@ class Document(EmDocument):
     self.deserialize(value)
     return self
 
-  def _add_key_to_index(self, field, value, key):
-    if isinstance(value, (tuple, list)):
-      indexes = [(field, v) for v in value]
-    elif isinstance(value, Document):
-      indexes = [(field, value.key)]
-    else:
-      indexes = [(field, value)]
+  def _add_to_index_write_batch(self, field, value):
+    if value is None: # We value is null. This is a refactoring step.
+      return
 
-    # I know I overwrote field and value. Calm down. It's okay.
-    for field, value in indexes:
-      index_key = _INDEX_KEY.format(f=field, v=value)
-      try:
-        keys = json.load(self.__class__.indexdb.Get(index_key))
-      except KeyError:
-        keys = []
-
-      if key not in keys:
-        keys.append(key)
-        self.__class__._indexdb_write_batch.Put(index_key, json.dumps(keys))
-        self.__class__._index_write_needed = True
-
-  def _remove_key_from_index(cls, field, value, key):
     index_key = _INDEX_KEY.format(f=field, v=value)
     try:
-      keys = json.loads(cls.index_db.Get(index_key))
+      keys = json.loads(self.__class__.indexdb.Get(index_key))
     except KeyError:
-      return
+      keys = []
+
+    if self.key not in keys:
+      keys.append(self.key)
+      self.__class__._indexdb_write_batch.Put(index_key, json.dumps(keys))
+      self.__class__._index_write_needed = True
+
+  def _remove_from_index_write_batch(self, field, value):
+    index_key = _INDEX_KEY.format(f=field, v=value)
+    try:
+      keys = json.loads(self.__class__.indexdb.Get(index_key))
+    except KeyError:
+      return # Consider as already removed...
 
     try:
-      keys.remove(key)
+      keys.remove(self.key)
     except ValueError:
-      return
+      return # Consider as already removed...
 
     if len(keys) == 0:
-      cls._index_db_write_batch.Delete(index_key)
+      # do some housekeeping.
+      self.__class__._index_db_write_batch.Delete(index_key)
     else:
-      cls._index_db_write_batch.Put(index_key, json.dumps(keys))
+      self.__class__._index_db_write_batch.Put(index_key, json.dumps(keys))
 
-    cls._index_write_needed = True
+    self.__class__._index_write_needed = True
 
   def _build_indexes(self, data):
     indexes = {}
@@ -467,7 +462,52 @@ class Document(EmDocument):
 
   def _figure_out_index_writes(self, old, new):
     # Let the magic begin.
-    pass
+    # > also, this kinda behaviour will usually result in a conflict because
+    #   we are caching some states and if it gets modified else where....
+    # > GOOD THING LEVELDB IS SINGLE THREADED. AMIRITE? :D
+    # > No. You're not right. If you have in the same application 2 copies
+    #   of the same document... you see where I'm headed with this?
+    # > Please don't do that.
+
+    # old and new are all serialized data.
+    # The only type difference is there is list, string, and numbers o.o
+
+    for field, value in old.iteritems():
+      if isinstance(value, (list, tuple)): # this looks hackish.
+        old_values = set(value)
+
+        _temp = new.get(field)
+        new_values = set(_temp) if _temp else set()
+
+        for v in (old_values - new_values):
+          self._remove_from_index_write_batch(field, v)
+        for v in (new_values - old_values):
+          self._add_to_index_write_batch(field, v)
+      else:
+        # other types don't really matter.
+        if field not in new:
+          self._remove_from_index_write_batch(field, value)
+        else:
+          if value != new[field]:
+            self._remove_from_index_write_batch(field, value)
+            # None values should be handled by _add_to_index_write_batch and
+            # it should simply return.
+            self._add_to_index_write_batch(field, new[field])
+
+    # Now we need to take a look at the new dictionary and make sure to add
+    # anything that we missed. We already noted the change in field as well as
+    # any field that is removed and became None in the lines above.
+
+    # there's gotta be an easier way to do this?? :x
+
+    for field, value in new.iteritems():
+      if field not in old:
+        # TODO: refactor
+        if isinstance(value, (list, tuple)):
+          for v in value:
+            self._add_to_index_write_batch(field, v)
+        else:
+          self._add_to_index_write_batch(field, value)
 
   def save(self, sync=True, db=None, batch=False):
     """Saves the document to the database
