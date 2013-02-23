@@ -150,7 +150,7 @@ Static methods defined here:<br>
 
 <hr>
 Methods inherited from <a href="leveldbkit.properties.standard.html#BaseProperty">leveldbkit.properties.standard.BaseProperty</a>:<br>
-<dl><dt><a name="PasswordProperty-__init__"><strong>__init__</strong></a>(self, required<font color="#909090">=False</font>, default<font color="#909090">=&lt;object object&gt;</font>, validators<font color="#909090">=[]</font>, load_on_demand<font color="#909090">=False</font>)</dt><dd><tt>Initializes&nbsp;a&nbsp;new&nbsp;instance&nbsp;of&nbsp;a&nbsp;property.<br>
+<dl><dt><a name="PasswordProperty-__init__"><strong>__init__</strong></a>(self, required<font color="#909090">=False</font>, default<font color="#909090">=&lt;object object&gt;</font>, validators<font color="#909090">=[]</font>, load_on_demand<font color="#909090">=False</font>, index<font color="#909090">=False</font>)</dt><dd><tt>Initializes&nbsp;a&nbsp;new&nbsp;instance&nbsp;of&nbsp;a&nbsp;property.<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;required:&nbsp;True&nbsp;or&nbsp;false,&nbsp;this&nbsp;will&nbsp;test&nbsp;for&nbsp;requiredness&nbsp;(None&nbsp;value&nbsp;will<br>
@@ -164,7 +164,12 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;must&nbsp;return&nbsp;True&nbsp;or&nbsp;False.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note:&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;turn&nbsp;off&nbsp;validations,&nbsp;set&nbsp;this&nbsp;to&nbsp;None.<br>
 &nbsp;&nbsp;load_on_demand:&nbsp;A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;if&nbsp;we&nbsp;want&nbsp;to&nbsp;convert&nbsp;the&nbsp;value<br>
-&nbsp;&nbsp;upon&nbsp;getting&nbsp;from&nbsp;the&nbsp;database&nbsp;or&nbsp;when&nbsp;it&nbsp;is&nbsp;first&nbsp;accessed.</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;upon&nbsp;getting&nbsp;from&nbsp;the&nbsp;database&nbsp;or&nbsp;when&nbsp;it&nbsp;is&nbsp;first<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accessed.<br>
+&nbsp;&nbsp;index:&nbsp;A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;if&nbsp;this&nbsp;property&nbsp;should&nbsp;be&nbsp;indexed&nbsp;so<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;can&nbsp;be&nbsp;found&nbsp;using&nbsp;index.&nbsp;This&nbsp;is&nbsp;only&nbsp;valid&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StringProperty,&nbsp;NumberProperty,&nbsp;ListProperty,&nbsp;and&nbsp;ReferenceProperty<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;Document.</tt></dd></dl>
 
 <dl><dt><a name="PasswordProperty-default"><strong>default</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;the&nbsp;property.&nbsp;It&nbsp;will&nbsp;return&nbsp;either&nbsp;the<br>
 default&nbsp;value&nbsp;given&nbsp;(or&nbsp;generate&nbsp;one&nbsp;via&nbsp;the&nbsp;function)&nbsp;or&nbsp;the&nbsp;default&nbsp;for<br>
