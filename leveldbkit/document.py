@@ -30,7 +30,7 @@ from copy import copy
 
 from .properties.standard import BaseProperty, StringProperty, NumberProperty, ReferenceProperty, ListProperty
 from .helpers import walk_parents
-from .exceptions import ValidationError, NotFoundError
+from .exceptions import ValidationError, NotFoundError, DatabaseError
 
 from leveldb import WriteBatch
 
@@ -47,8 +47,8 @@ class EmDocumentMetaclass(type):
     for name in attrs.keys():
       if isinstance(attrs[name], BaseProperty):
         meta[name] = attrs.pop(name)
-      if build_indexes and isinstance(attrs[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and attrs[name]._index:
-        indexes.append(name)
+        if build_indexes and isinstance(meta[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and meta[name]._index:
+          indexes.append(name)
 
     all_parents = reversed(walk_parents(parents))
 
@@ -390,7 +390,68 @@ class Document(EmDocument):
   @classmethod
   def _ensure_indexdb_exists(cls):
     if not cls.indexdb:
-      raise AttributeError("indexdb is not defined for `{0}`".format(cls.__name__))
+      raise DatabaseError("indexdb is not defined for `{0}`".format(cls.__name__))
+
+  @classmethod
+  def index_keys_only(cls, field, start_value, end_value=None):
+    """Index lookup. Given a field and a value, find the associated document
+    keys.
+
+    Args:
+      field: The field name
+      start_value: the value to look for, or the beginning value for a range
+      end_value: if not None, this is a ranged search, that is, all document with
+                 of field and value between start_value and end_value will be
+                 returned
+    Returns:
+      A list of all the keys associated.
+
+    Raises:
+      DatabaseError if no index database is defined.
+    """
+    cls._ensure_indexdb_exists()
+    if end_value is None:
+      try:
+        return json.loads(cls.indexdb.Get(_INDEX_KEY.format(field, start_value)))
+      except KeyError:
+        return []
+    else:
+      all_keys = []
+      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(field, start_value), _INDEX_KEY.format(field, end_value)):
+        all_keys.extend(keys)
+      return all_keys
+
+  @classmethod
+  def index(cls, field, start_value, end_value=None):
+    """Index lookup. Given a field and a value, find the associated documents
+
+    Args:
+      field: The field name
+      start_value: the value to look for, or the beginning value for a range
+      end_value: if not None, this is a ranged search, that is, all document with
+                 of field and value between start_value and end_value will be
+                 returned
+    Returns:
+      A generator that iterates through all the documents
+
+    Raises:
+      DatabaseError if no index database is defined.
+    """
+    cls._ensure_indexdb_exists()
+    if end_value is None:
+      try:
+        keys = json.loads(cls.indexdb.Get(_INDEX_KEY.format(field, start_value)))
+      except KeyError:
+        keys = []
+
+      for key in keys:
+        yield cls(key).reload()
+
+    else:
+      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(field, start_value), _INDEX_KEY.format(field, end_value)):
+        keys = json.loads(keys)
+        for key in keys:
+          yield cls(key).reload()
 
 
   def clear(self, to_default=True):
@@ -448,9 +509,9 @@ class Document(EmDocument):
 
     if len(keys) == 0:
       # do some housekeeping.
-      self.__class__._index_db_write_batch.Delete(index_key)
+      self.__class__._indexdb_write_batch.Delete(index_key)
     else:
-      self.__class__._index_db_write_batch.Put(index_key, json.dumps(keys))
+      self.__class__._indexdb_write_batch.Put(index_key, json.dumps(keys))
 
     self.__class__._index_write_needed = True
 

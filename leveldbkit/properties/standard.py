@@ -49,7 +49,7 @@ class BaseProperty(object):
     """
     self.required = required
     self._default = default
-    self._validators = lambda v: True if validators is None else validators
+    self._validators = validators
     self.load_on_demand = load_on_demand
     self._index = index
 

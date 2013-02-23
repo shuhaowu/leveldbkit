@@ -99,7 +99,6 @@ class BasicDocumentTest(unittest.TestCase):
     self.assertEquals(doc2.key, doc2_copy.key)
     self.assertEquals(doc.key, doc2_copy.ref.key)
 
-
   def test_2i_save_delete(self):
     doc = SomeDocument()
     doc.test_str_index = "meow"
