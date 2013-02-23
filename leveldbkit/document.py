@@ -388,9 +388,12 @@ class Document(EmDocument):
       return doc
 
   @classmethod
-  def _ensure_indexdb_exists(cls):
+  def _ensure_indexdb_exists(cls, field=None):
     if not cls.indexdb:
       raise DatabaseError("indexdb is not defined for `{0}`".format(cls.__name__))
+
+    if not (field and field in cls._meta and cls._meta[field]._index):
+      raise DatabaseError("Field '{0}' is not indexed!".format(field))
 
   @classmethod
   def index_keys_only(cls, field, start_value, end_value=None):
@@ -409,15 +412,21 @@ class Document(EmDocument):
     Raises:
       DatabaseError if no index database is defined.
     """
-    cls._ensure_indexdb_exists()
+    cls._ensure_indexdb_exists(field)
+
+    if isinstance(cls._meta[field], NumberProperty):
+      start_value = float(start_value)
+      if end_value is not None:
+        end_value = float(end_value)
+
     if end_value is None:
       try:
-        return json.loads(cls.indexdb.Get(_INDEX_KEY.format(field, start_value)))
+        return json.loads(cls.indexdb.Get(_INDEX_KEY.format(f=field, v=start_value)))
       except KeyError:
         return []
     else:
       all_keys = []
-      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(field, start_value), _INDEX_KEY.format(field, end_value)):
+      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
         all_keys.extend(keys)
       return all_keys
 
@@ -437,10 +446,16 @@ class Document(EmDocument):
     Raises:
       DatabaseError if no index database is defined.
     """
-    cls._ensure_indexdb_exists()
+    cls._ensure_indexdb_exists(field)
+
+    if isinstance(cls._meta[field], NumberProperty):
+      start_value = float(start_value)
+      if end_value is not None:
+        end_value = float(end_value)
+
     if end_value is None:
       try:
-        keys = json.loads(cls.indexdb.Get(_INDEX_KEY.format(field, start_value)))
+        keys = json.loads(cls.indexdb.Get(_INDEX_KEY.format(f=field, v=start_value)))
       except KeyError:
         keys = []
 
@@ -448,7 +463,7 @@ class Document(EmDocument):
         yield cls(key).reload()
 
     else:
-      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(field, start_value), _INDEX_KEY.format(field, end_value)):
+      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
         keys = json.loads(keys)
         for key in keys:
           yield cls(key).reload()

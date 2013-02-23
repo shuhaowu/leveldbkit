@@ -123,7 +123,7 @@ class BasicDocumentTest(unittest.TestCase):
     _test_keys_only(self, doc, "test_number_index", 1337)
 
     doc.test_str_index = "quack"
-    del doc.test_number_index
+    doc.test_number_index = 1336
     doc.test_list_index = ["hello", "wut"]
     doc.save()
 
@@ -139,10 +139,12 @@ class BasicDocumentTest(unittest.TestCase):
     # This is really bad in practise. Divergent copies are bad.
     samedoc = SomeDocument.get(doc.key)
     del samedoc.test_list_index
+    del samedoc.test_number_index
     samedoc.save()
 
     _test_keys_only(self, None, "test_list_index", "hello")
     _test_keys_only(self, None, "test_list_index", "wut")
+    _test_keys_only(self, None, "test_number_index", 1336)
 
     samedoc.delete()
 
