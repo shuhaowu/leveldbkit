@@ -19,3 +19,4 @@
 class LeveldbkitError(Exception): pass
 class ValidationError(LeveldbkitError): pass
 class NotFoundError(LeveldbkitError): pass
+class DatabaseError(LeveldbkitError): pass

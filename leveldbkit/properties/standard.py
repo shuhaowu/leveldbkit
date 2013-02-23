@@ -23,7 +23,9 @@ class BaseProperty(object):
     All property types are required to be extended from this class.
   """
 
-  def __init__(self, required=False, default=_NOUNCE, validators=[], load_on_demand=False):
+  def __init__(self, required=False, default=_NOUNCE,
+               validators=[], load_on_demand=False,
+               index=False):
     """Initializes a new instance of a property.
 
     Args:
@@ -38,15 +40,18 @@ class BaseProperty(object):
                   function must return True or False.
                   Note: if you want to turn off validations, set this to None.
       load_on_demand: A boolean value indicating if we want to convert the value
-      upon getting from the database or when it is first accessed.
+                      upon getting from the database or when it is first
+                      accessed.
+      index: A boolean value indicating if this property should be indexed so
+             it can be found using index. This is only valid for
+             StringProperty, NumberProperty, ListProperty, and ReferenceProperty
+             with Document.
     """
     self.required = required
     self._default = default
     self._validators = validators
-    if self._validators == None:
-      self._validators = lambda v: True
-
     self.load_on_demand = load_on_demand
+    self._index = index
 
   def validate(self, value):
     if value is None:

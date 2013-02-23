@@ -26,22 +26,29 @@ except ImportError:
     import json
 
 from uuid import uuid1
+from copy import copy
 
-from .properties.standard import BaseProperty
+from .properties.standard import BaseProperty, StringProperty, NumberProperty, ReferenceProperty, ListProperty
 from .helpers import walk_parents
-from .exceptions import ValidationError, NotFoundError
+from .exceptions import ValidationError, NotFoundError, DatabaseError
 
 from leveldb import WriteBatch
 
 class EmDocumentMetaclass(type):
-  def __new__(cls, clsname, parents, attrs):
+  def __new__(cls, clsname, parents, attrs, build_indexes=False):
     if clsname in ("Document", "EmDocument"):
       return type.__new__(cls, clsname, parents, attrs)
 
     meta = {}
+
+    if build_indexes:
+      indexes = []
+
     for name in attrs.keys():
       if isinstance(attrs[name], BaseProperty):
         meta[name] = attrs.pop(name)
+        if build_indexes and isinstance(meta[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and meta[name]._index:
+          indexes.append(name)
 
     all_parents = reversed(walk_parents(parents))
 
@@ -49,6 +56,8 @@ class EmDocumentMetaclass(type):
       meta.update(p_cls._meta)
 
     attrs["_meta"] = meta
+    if build_indexes:
+      attrs["_indexes"] = indexes
     return type.__new__(cls, clsname, parents, attrs)
 
   def __getattr__(self, name):
@@ -279,26 +288,26 @@ class DocumentMetaclass(EmDocumentMetaclass):
     attrs["_write_batch"] = WriteBatch()
     attrs["_index_write_needed"] = False
 
-    if "index_db" in attrs and attrs["index_db"] is not None:
-      attrs["_index_db_write_batch"] = WriteBatch()
+    if "indexdb" in attrs and attrs["indexdb"] is not None:
+      attrs["_indexdb_write_batch"] = WriteBatch()
 
-    return EmDocumentMetaclass.__new__(cls, clsname, parents, attrs)
+    return EmDocumentMetaclass.__new__(cls, clsname, parents, attrs, True)
+
+_INDEX_KEY = "{f}~{v}"
 
 class Document(EmDocument):
   """The base Document class for custom classes to extend from.
   There are a couple of class variables that's required for this to work:
     - `db`: a `leveldb.LevelDB` instance that points to the database.
-    - `index_dbs`: a dictionary: 2i field => `leveldb.LevelDB` instance.
+    - `indexdbs`: a dictionary: 2i field => `leveldb.LevelDB` instance.
 
   """
   __metaclass__ = DocumentMetaclass
 
-  index_db = None
-
   @classmethod
   def _flush_indexes(cls, sync=True):
     if cls._index_write_needed:
-      cls.index_db.Write(cls._index_db_write_batch, sync=sync)
+      cls.indexdb.Write(cls._indexdb_write_batch, sync=sync)
       cls._index_write_needed = False
 
   @classmethod
@@ -315,17 +324,13 @@ class Document(EmDocument):
     cls._write_batch = WriteBatch()
     cls._flush_indexes(sync)
 
-  def __hash__(self):
-    return hash((self.key, self.bucket_name, self.vclock))
-
-  def __eq__(self, other):
-    if isinstance(other, self.__class__):
-      return hash(self) == hash(other)
-    else:
-      return False
-
-  def __ne__(self, other):
-    return not self.__eq__(other)
+  @classmethod
+  def reset_write_batch(self):
+    """Empties the current write batch.
+    This means all the current writes are void"""
+    cls._write_batch = WriteBatch()
+    cls._indexdb_write_batch = WriteBatch()
+    cls._index_write_needed = False
 
   def __init__(self, key=lambda: uuid1().hex, data={}, db=None):
     """Creates a new instance of a document.
@@ -347,8 +352,7 @@ class Document(EmDocument):
     self.__dict__["key"] = key
     EmDocument.__init__(self, data)
     self.__dict__["db"] = db or self.__class__.db
-    self.__dict__["_indexes"] = set()
-    self.__dict__["_removed_indexes"] = set()
+    self.__dict__["_old_indexes"] = {}
 
   @classmethod
   def get(cls, key, verify_checksums=False, fill_cache=True, db=None):
@@ -380,13 +384,17 @@ class Document(EmDocument):
       return doc
 
   @classmethod
-  def _ensure_index_db_exists(cls):
-    if not cls.index_db:
-      raise AttributeError("index_db is not defined for `{0}`".format(cls.__name__))
+  def _ensure_indexdb_exists(cls, field=None):
+    if not cls.indexdb:
+      raise DatabaseError("indexdb is not defined for `{0}`".format(cls.__name__))
+
+    if not (field and field in cls._meta and cls._meta[field]._index):
+      raise DatabaseError("Field '{0}' is not indexed!".format(field))
 
   @classmethod
-  def index_lookup(cls, field, start_value, end_value=None):
+  def index_keys_only(cls, field, start_value, end_value=None):
     """Index lookup. Given a field and a value, find the associated document
+    keys.
 
     Args:
       field: The field name
@@ -395,25 +403,66 @@ class Document(EmDocument):
                  of field and value between start_value and end_value will be
                  returned
     Returns:
-      An iterator through all the documents
+      A list of all the keys associated.
+
+    Raises:
+      DatabaseError if no index database is defined.
     """
-    cls._ensure_index_db_exists()
+    cls._ensure_indexdb_exists(field)
+
+    if isinstance(cls._meta[field], NumberProperty):
+      start_value = float(start_value)
+      if end_value is not None:
+        end_value = float(end_value)
+
     if end_value is None:
       try:
-        keys = json.loads(cls.index_db.Get(field + "~" + start_value))
+        return json.loads(cls.indexdb.Get(_INDEX_KEY.format(f=field, v=start_value)))
+      except KeyError:
+        return []
+    else:
+      all_keys = []
+      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
+        all_keys.extend(keys)
+      return all_keys
+
+  @classmethod
+  def index(cls, field, start_value, end_value=None):
+    """Index lookup. Given a field and a value, find the associated documents
+
+    Args:
+      field: The field name
+      start_value: the value to look for, or the beginning value for a range
+      end_value: if not None, this is a ranged search, that is, all document with
+                 of field and value between start_value and end_value will be
+                 returned
+    Returns:
+      A generator that iterates through all the documents
+
+    Raises:
+      DatabaseError if no index database is defined.
+    """
+    cls._ensure_indexdb_exists(field)
+
+    if isinstance(cls._meta[field], NumberProperty):
+      start_value = float(start_value)
+      if end_value is not None:
+        end_value = float(end_value)
+
+    if end_value is None:
+      try:
+        keys = json.loads(cls.indexdb.Get(_INDEX_KEY.format(f=field, v=start_value)))
       except KeyError:
         keys = []
 
       for key in keys:
-        doc = cls(key)
-        yield doc.reload()
+        yield cls(key).reload()
 
     else:
-      for index_value, keys in cls.index_db.RangeIter(field+"~"+start_value, field+"~"+end_value):
+      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
         keys = json.loads(keys)
         for key in keys:
-          doc = cls(key)
-          yield doc.reload()
+          yield cls(key).reload()
 
 
   def clear(self, to_default=True):
@@ -439,46 +488,98 @@ class Document(EmDocument):
 
     value = json.loads(value)
 
-    if "_2i" in value:
-      # json doesn't have tuple. We need to convert everything back into
-      # tuple so we can use a set.
-      self._indexes = set([(i[0], i[1])for i in value.pop("_2i")])
-
     self.deserialize(value)
     return self
 
-  @classmethod
-  def _add_key_to_index(cls, field, value, key):
-    index_key = field + "~" + value
+  def _add_to_index_write_batch(self, field, value):
+    if value is None: # We value is null. This is a refactoring step.
+      return
+
+    index_key = _INDEX_KEY.format(f=field, v=value)
     try:
-      keys = json.load(cls.index_db.Get(index_key))
+      keys = json.loads(self.__class__.indexdb.Get(index_key))
     except KeyError:
       keys = []
 
-    if key not in keys:
-      keys.append(key)
-      cls._index_db_write_batch.Put(index_key, json.dumps(keys))
-      cls._index_write_needed = True
+    if self.key not in keys:
+      keys.append(self.key)
+      self.__class__._indexdb_write_batch.Put(index_key, json.dumps(keys))
+      self.__class__._index_write_needed = True
 
-  @classmethod
-  def _remove_key_from_index(cls, field, value, key):
-    index_key = field + "~" + value
+  def _remove_from_index_write_batch(self, field, value):
+    index_key = _INDEX_KEY.format(f=field, v=value)
     try:
-      keys = json.loads(cls.index_db.Get(index_key))
+      keys = json.loads(self.__class__.indexdb.Get(index_key))
     except KeyError:
-      return
+      return # Consider as already removed...
 
     try:
-      keys.remove(key)
+      keys.remove(self.key)
     except ValueError:
-      return
+      return # Consider as already removed...
 
     if len(keys) == 0:
-      cls._index_db_write_batch.Delete(index_key)
+      # do some housekeeping.
+      self.__class__._indexdb_write_batch.Delete(index_key)
     else:
-      cls._index_db_write_batch.Put(index_key, json.dumps(keys))
+      self.__class__._indexdb_write_batch.Put(index_key, json.dumps(keys))
 
-    cls._index_write_needed = True
+    self.__class__._index_write_needed = True
+
+  def _build_indexes(self, data):
+    indexes = {}
+    for name in self.__class__._indexes:
+      indexes[name] = copy(data.get(name, None))
+    return indexes
+
+  def _figure_out_index_writes(self, old, new):
+    # Let the magic begin.
+    # > also, this kinda behaviour will usually result in a conflict because
+    #   we are caching some states and if it gets modified else where....
+    # > GOOD THING LEVELDB IS SINGLE THREADED. AMIRITE? :D
+    # > No. You're not right. If you have in the same application 2 copies
+    #   of the same document... you see where I'm headed with this?
+    # > Please don't do that.
+
+    # old and new are all serialized data.
+    # The only type difference is there is list, string, and numbers o.o
+
+    for field, value in old.iteritems():
+      if isinstance(value, (list, tuple)): # this looks hackish.
+        old_values = set(value)
+
+        _temp = new.get(field)
+        new_values = set(_temp) if _temp else set()
+
+        for v in (old_values - new_values):
+          self._remove_from_index_write_batch(field, v)
+        for v in (new_values - old_values):
+          self._add_to_index_write_batch(field, v)
+      else:
+        # other types don't really matter.
+        if field not in new:
+          self._remove_from_index_write_batch(field, value)
+        else:
+          if value != new[field]:
+            self._remove_from_index_write_batch(field, value)
+            # None values should be handled by _add_to_index_write_batch and
+            # it should simply return.
+            self._add_to_index_write_batch(field, new[field])
+
+    # Now we need to take a look at the new dictionary and make sure to add
+    # anything that we missed. We already noted the change in field as well as
+    # any field that is removed and became None in the lines above.
+
+    # there's gotta be an easier way to do this?? :x
+
+    for field, value in new.iteritems():
+      if field not in old:
+        # TODO: refactor
+        if isinstance(value, (list, tuple)):
+          for v in value:
+            self._add_to_index_write_batch(field, v)
+        else:
+          self._add_to_index_write_batch(field, value)
 
   def save(self, sync=True, db=None, batch=False):
     """Saves the document to the database
@@ -493,14 +594,14 @@ class Document(EmDocument):
       self
     """
     value = self.serialize()
-    value["_2i"] = list(self._indexes)
+
+    new_indexes = self._build_indexes(value)
+    self._figure_out_index_writes(self._old_indexes, new_indexes)
+    # BUG: (?) Is it possible to fail something so badly that the _old_indexes
+    # never gets flushed? Hopefully not.
+    self._old_indexes = new_indexes
+
     value = json.dumps(value)
-
-    for f, v in self._indexes:
-      self._add_key_to_index(f, v, self.key)
-
-    for f, v in self._removed_indexes:
-      self._remove_key_from_index(f, v, self.key)
 
     if batch:
       self._write_batch.Put(self.key, value)
@@ -523,8 +624,8 @@ class Document(EmDocument):
     Returns:
       self
     """
-    for field, value in self._indexes:
-      self._remove_key_from_index(field, value, self.key)
+    self._figure_out_index_writes(self._old_indexes, {})
+    self._old_indexes = {}
 
     if batch:
       self._write_batch.Delete(self.key)
@@ -535,6 +636,10 @@ class Document(EmDocument):
 
     self.clear(False)
     return self
+
+  def deserialize(self, data):
+    self._old_indexes = self._build_indexes(data)
+    return EmDocument.deserialize(self, data)
 
   @classmethod
   def delete_key(cls, key, sync=False, db=None, batch=False):
@@ -553,84 +658,3 @@ class Document(EmDocument):
     else:
       db = db or cls.db
       db.Delete(cls.key, sync)
-
-  def add_index(self, field, value):
-    """Add a secondary index.
-
-    Args:
-      field: the field name of the index
-      value: the value for the index
-    Returns:
-      self
-    Raises:
-      AttributeError if `index_db` is None or not defined
-    """
-    self._ensure_index_db_exists()
-    self._indexes.add((field, value))
-    return self
-
-  def remove_index(self, field, value=None):
-    """Removes a secondary index.
-
-    Args:
-      field: The field name of the index to remove.
-      value: The value of the index to remove. Defaults to None. If None, then
-             every index with that field from this object will be removed
-             regardless of the value. Otherwise, only the specific one will be
-             removed.
-    Returns:
-      self
-    Raises:
-      AttributeError if `index_db` is None or not defined
-    """
-    self._ensure_index_db_exists()
-    if value is None:
-      self._indexes = {(f, v) for f, v in self._indexes if f != field}
-    else:
-      try:
-        self._indexes.remove((field, value))
-      except KeyError:
-        pass
-      else:
-        self._removed_indexes.add((field, value))
-
-    return self
-
-  def set_index(self, indexes):
-    """Sets the index. Dangerous.
-
-    Args:
-      indexes: The indexes consisting of a set of (field, value) pairs. No
-               validation is done with this so at this point weird errors may
-               show up. This also doesn't do a copy. So it is entirely your
-               fault if something screws up!
-    Returns:
-      self
-    Raises:
-      AttributeError if `index_db` is None or not defined
-    """
-    self._ensure_index_db_exists()
-    self._indexes = indexes
-    return self
-
-  def index(self, field=None):
-    """Get an index value or all indexes.
-
-    Args:
-      field: Defaults to None. If it is specified, that particular field's
-             values will be returned as a list. Otherwise this returns
-             the set of (field, value) (not a copy! again! So you can modify
-             as you please but it is dangerous)
-    Returns:
-      Either the set of (field, value) (not a copy!!) or a list of all the
-      index values associated to that field.
-    Raises:
-      AttributeError if `index_db` is None or not defined
-    """
-    self._ensure_index_db_exists()
-    if field is None:
-      return self._indexes
-    else:
-      return [v for f, v in self._indexes if f == field]
-
-  indexes = index
