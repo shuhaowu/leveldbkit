@@ -106,7 +106,6 @@ class BasicDocumentTest(unittest.TestCase):
     with self.assertRaises(NotFoundError):
       SomeDocument.get(doc.key)
 
-
   def test_reference_document(self):
     doc = SomeDocument()
     doc.save()

@@ -53,7 +53,8 @@ class EmDocumentMetaclass(type):
     all_parents = reversed(walk_parents(parents))
 
     for p_cls in all_parents:
-      meta.update(p_cls._meta)
+      if hasattr(p_cls, "_meta"):
+        meta.update(p_cls._meta)
 
     attrs["_meta"] = meta
     if build_indexes:
