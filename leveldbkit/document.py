@@ -32,7 +32,7 @@ from .properties.standard import BaseProperty, StringProperty, NumberProperty, R
 from .helpers import walk_parents
 from .exceptions import ValidationError, NotFoundError, DatabaseError
 
-from leveldb import WriteBatch
+from leveldb import WriteBatch, LevelDB
 
 class EmDocumentMetaclass(type):
   def __new__(cls, clsname, parents, attrs, build_indexes=False):
@@ -300,15 +300,31 @@ class Document(EmDocument):
   """The base Document class for custom classes to extend from.
   There are a couple of class variables that's required for this to work:
     - `db`: a `leveldb.LevelDB` instance that points to the database.
-    - `indexdbs`: a dictionary: 2i field => `leveldb.LevelDB` instance.
-
+    - `indexdb`: a dictionary: 2i field => `leveldb.LevelDB` instance.
+    - `OPEN_ONLY_WHEN_NEEDED`: This indicates that `db` and `indexdb` are paths
+                               to the database and it will only open when we
+                               write (no more locks! although race conditions)
+                               At the end of the day I'm gonna write a leveldb
+                               server based off of https://github.com/srinikom/leveldb-server
   """
   __metaclass__ = DocumentMetaclass
+
+  OPEN_ONLY_WHEN_NEEDED = False
+
+
+  @classmethod
+  def _get_indexdb(cls):
+    return LevelDB(cls.indexdb) if cls.OPEN_ONLY_WHEN_NEEDED else cls.indexdb
+
+  @classmethod
+  def _get_db(cls, db=None):
+    db = db or cls.db
+    return LevelDB(db) if cls.OPEN_ONLY_WHEN_NEEDED else db
 
   @classmethod
   def _flush_indexes(cls, sync=True):
     if cls._index_write_needed:
-      cls.indexdb.Write(cls._indexdb_write_batch, sync=sync)
+      cls._get_indexdb().Write(cls._indexdb_write_batch, sync=sync)
       cls._index_write_needed = False
 
   @classmethod
@@ -320,13 +336,13 @@ class Document(EmDocument):
       db: The db to write to. Defaults to the default class database. The index
           dbs will not be affected.
     """
-    db = db or cls.db
+    db = db or cls._get_db()
     db.Write(cls._write_batch, sync=sync)
     cls._write_batch = WriteBatch()
     cls._flush_indexes(sync)
 
   @classmethod
-  def reset_write_batch(self):
+  def reset_write_batch(cls):
     """Empties the current write batch.
     This means all the current writes are void"""
     cls._write_batch = WriteBatch()
@@ -418,12 +434,12 @@ class Document(EmDocument):
 
     if end_value is None:
       try:
-        return json.loads(cls.indexdb.Get(_INDEX_KEY.format(f=field, v=start_value)))
+        return json.loads(cls._get_indexdb().Get(_INDEX_KEY.format(f=field, v=start_value)))
       except KeyError:
         return []
     else:
       all_keys = []
-      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
+      for index_value, keys in cls._get_indexdb().RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
         all_keys.extend(keys)
       return all_keys
 
@@ -452,7 +468,7 @@ class Document(EmDocument):
 
     if end_value is None:
       try:
-        keys = json.loads(cls.indexdb.Get(_INDEX_KEY.format(f=field, v=start_value)))
+        keys = json.loads(cls._get_indexdb().Get(_INDEX_KEY.format(f=field, v=start_value)))
       except KeyError:
         keys = []
 
@@ -460,7 +476,7 @@ class Document(EmDocument):
         yield cls(key).reload()
 
     else:
-      for index_value, keys in cls.indexdb.RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
+      for index_value, keys in cls._get_indexdb().RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
         keys = json.loads(keys)
         for key in keys:
           yield cls(key).reload()
@@ -481,7 +497,7 @@ class Document(EmDocument):
       db: A `leveldb.LevelDB` instance to reload from. Defaults to the
           object/class db.
     """
-    db = db or self.db
+    db = self.__class__._get_db(db or self.db)
     try:
       value = db.Get(self.key)
     except KeyError:
@@ -498,7 +514,7 @@ class Document(EmDocument):
 
     index_key = _INDEX_KEY.format(f=field, v=value)
     try:
-      keys = json.loads(self.__class__.indexdb.Get(index_key))
+      keys = json.loads(self.__class__._get_indexdb().Get(index_key))
     except KeyError:
       keys = []
 
@@ -510,7 +526,7 @@ class Document(EmDocument):
   def _remove_from_index_write_batch(self, field, value):
     index_key = _INDEX_KEY.format(f=field, v=value)
     try:
-      keys = json.loads(self.__class__.indexdb.Get(index_key))
+      keys = json.loads(self.__class__._get_indexdb().Get(index_key))
     except KeyError:
       return # Consider as already removed...
 
@@ -607,7 +623,7 @@ class Document(EmDocument):
     if batch:
       self._write_batch.Put(self.key, value)
     else:
-      db = db or self.db
+      db = self.__class__._get_db(db or self.db)
       db.Put(self.key, value, sync)
       self._flush_indexes(sync)
 
@@ -631,7 +647,7 @@ class Document(EmDocument):
     if batch:
       self._write_batch.Delete(self.key)
     else:
-      db = db or self.db
+      db = self.__class__._get_db(db or self.db)
       db.Delete(self.key, sync)
       self._flush_indexes(sync)
 
@@ -657,5 +673,5 @@ class Document(EmDocument):
     if batch:
       cls._write_batch.Delete(key)
     else:
-      db = db or cls.db
+      db = cls._get_db(db)
       db.Delete(cls.key, sync)
