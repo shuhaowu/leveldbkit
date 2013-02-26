@@ -50,6 +50,12 @@ class DocumentWithRef(Document):
 
   ref = ReferenceProperty(SomeDocument)
 
+class DocumentDbOnDemand(Document):
+  db = "{0}/test3.db".format(test_dir)
+  OPEN_ONLY_WHEN_NEEDED = True
+
+  test = StringProperty()
+
 class BasicDocumentTest(unittest.TestCase):
 
   def setUp(self):
@@ -193,6 +199,15 @@ class BasicDocumentTest(unittest.TestCase):
       self.assertEquals(doc.key, d.key)
 
     self.assertEquals(2, counter)
+
+  def test_db_load_ondemand(self):
+    doc = DocumentDbOnDemand()
+    db = leveldb.LevelDB(DocumentDbOnDemand.db)
+    del db
+    doc.save()
+    self.cleanups.append(doc)
+    db = leveldb.LevelDB(DocumentDbOnDemand.db)
+    del db
 
   def test_2i_batch(self):
     pass
