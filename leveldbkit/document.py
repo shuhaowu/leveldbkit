@@ -316,11 +316,9 @@ class Document(EmDocument):
     if cls.OPEN_ONLY_WHEN_NEEDED:
       if hasattr(cls, "db"):
         cls.db = LevelDB(cls.db)
-        cls._get_db = lambda cls, db: db or cls.db
 
       if hasattr(cls, "indexdb"):
         cls.indexdb = LevelDB(cls.indexdb)
-        cls._get_indexdb = lambda cls: cls.indexdb
 
       cls.OPEN_ONLY_WHEN_NEEDED = False
 
