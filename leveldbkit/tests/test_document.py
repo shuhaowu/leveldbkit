@@ -208,6 +208,10 @@ class BasicDocumentTest(unittest.TestCase):
     self.cleanups.append(doc)
     db = leveldb.LevelDB(DocumentDbOnDemand.db)
     del db
+    doc.test = "meow"
+    doc.save()
+    db = leveldb.LevelDB(DocumentDbOnDemand.db)
+    del db
 
   def test_2i_batch(self):
     pass

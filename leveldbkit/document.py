@@ -311,6 +311,14 @@ class Document(EmDocument):
 
   OPEN_ONLY_WHEN_NEEDED = False
 
+  @classmethod
+  def establish_connection(cls):
+    if cls.OPEN_ONLY_WHEN_NEEDED:
+      cls.db = LevelDB(cls.db)
+      cls.indexdb = LevelDB(cls.indexdb)
+      cls.OPEN_ONLY_WHEN_NEEDED = False
+      cls._get_db = lambda cls, db: db or cls.db
+      cls._get_indexdb = lambda cls: cls.indexdb
 
   @classmethod
   def _get_indexdb(cls):
