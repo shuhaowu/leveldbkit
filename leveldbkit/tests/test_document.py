@@ -23,6 +23,7 @@ from ..properties import *
 from ..document import Document
 from ..exceptions import NotFoundError
 
+import json
 import leveldb
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -214,7 +215,22 @@ class BasicDocumentTest(unittest.TestCase):
     del db
 
   def test_2i_batch(self):
-    pass
+    doc = SomeDocument()
+    doc.test_number_index = 12
+
+    doc.save(batch=True)
+    with self.assertRaises(KeyError):
+      SomeDocument.indexdb.Get("test_number_index~12.0")
+
+    SomeDocument.flush()
+    self.cleanups.append(doc)
+
+    v = SomeDocument.indexdb.Get("test_number_index~12.0")
+    self.assertTrue(v)
+    v = json.loads(v)
+    self.assertEquals(1, len(v))
+    self.assertEquals(doc.key, v[0])
+
 
 if __name__ == "__main__":
   unittest.main()
