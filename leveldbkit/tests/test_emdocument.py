@@ -177,6 +177,15 @@ class EmDocumentTest(unittest.TestCase):
     self.assertTrue(doc.is_valid())
     self.assertEquals([], doc.invalids())
 
+  def test_restricted_serialize(self):
+    doc = SimpleDocument()
+    doc.sr = "required"
+    doc.sv = "valid"
+    serialized = doc.serialize(restricted=("sr", "sv"))
+    self.assertFalse("sr" in serialized)
+    self.assertFalse("sv" in serialized)
+    self.assertTrue("sd" in serialized)
+
 
 if __name__ == "__main__":
   unittest.main()

@@ -101,12 +101,18 @@ class EmDocument(object):
   def _attribute_not_found(self, name):
     raise AttributeError("Attribute '{0}' not found with '{1}'.".format(name, self.__class__.__name__))
 
-  def serialize(self, dictionary=True):
+  def serialize(self, dictionary=True, restricted=tuple()):
     """Serializes the object into a dictionary with all the proper conversions
 
     Args:
       dictionary: boolean. If True, this will return a dictionary, otherwise the
                   dictionary will be dumped by json.
+      restricted: The properties to not output in the serialized output. Useful
+                  in scenarios where you need to hide info from something.
+                  An example would be you need to hide some sort of token from
+                  the user but you need to return the object to them, without
+                  the token. This defaults to tuple(), which means nothing is
+                  restricted.
     Returns:
       A plain dictionary representation of the object after all the conversion
       to make it json friendly.
@@ -115,6 +121,8 @@ class EmDocument(object):
 
     d = {}
     for name, value in self._data.iteritems():
+      if name in restricted:
+        continue
       if name in self._meta:
         if not self._meta[name].validate(value):
           self._validation_error(name, value)
