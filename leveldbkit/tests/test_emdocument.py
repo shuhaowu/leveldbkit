@@ -32,6 +32,11 @@ class SimpleDocument(EmDocument):
   sv = StringProperty(validators=lambda v: v == "valid")
   sd = StringProperty(default="default")
 
+class DefinedOnlyDocument(EmDocument):
+  DEFINED_PROPERTIES_ONLY = True
+
+  prop = StringProperty()
+
 class DocumentWithLoadOnDemand(EmDocument):
   d = EmDocumentProperty(SimpleDocument, load_on_demand=True)
 
@@ -155,6 +160,22 @@ class EmDocumentTest(unittest.TestCase):
     self.assertEquals(None, doc.sd)
     self.assertEquals(None, doc.sv)
     self.assertEquals("test", doc.prop)
+
+  def test_defined_only(self):
+    doc = DefinedOnlyDocument()
+    doc.prop = "test"
+    doc.wut = "yes"
+
+    with self.assertRaises(ValidationError):
+      doc.serialize()
+
+    self.assertFalse(doc.is_valid())
+    self.assertTrue("_extra_props" in doc.invalids())
+
+    del doc.wut
+    self.assertEquals({"prop": "test"}, doc.serialize())
+    self.assertTrue(doc.is_valid())
+    self.assertEquals([], doc.invalids())
 
 
 if __name__ == "__main__":

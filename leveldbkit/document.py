@@ -68,8 +68,20 @@ class EmDocumentMetaclass(type):
 
 
 class EmDocument(object):
-  """Embedded document as a JSON object"""
+  """Embedded document as a JSON object
+
+  Class Variables:
+    - `DEFINED_PROPERTIES_ONLY`: A boolean value indicating that the only
+                                 properties allowed are the ones defined.
+                                 Defaults to False. If a violation is found,
+                                 an error will be raised on `serialize` (and
+                                 `save` for Document) and False will be returned
+                                 in `is_valid`. `invalids` will return
+                                 `"_extra_props"` in the list.
+  """
   __metaclass__ = EmDocumentMetaclass
+
+  DEFINED_PROPERTIES_ONLY = False
 
   def __init__(self, data={}):
     """Initializes a new EmDocument
@@ -97,12 +109,16 @@ class EmDocument(object):
       A plain dictionary representation of the object after all the conversion
       to make it json friendly.
     """
+    # Note that this doesn't call is_valid as it has built in validation.
+
     d = {}
     for name, value in self._data.iteritems():
-      if name in self._meta and isinstance(self._meta[name], BaseProperty):
+      if name in self._meta:
         if not self._meta[name].validate(value):
           self._validation_error(name, value)
         value = self._meta[name].to_db(value)
+      elif self.DEFINED_PROPERTIES_ONLY:
+        raise ValidationError("Property {} is not defined and {} has DEFINED_PROPERTIES_ONLY".format(name, self.__class__.__name__))
 
       d[name] = value
 
@@ -160,6 +176,13 @@ class EmDocument(object):
     for name in self._meta:
       if not self._validate_attribute(name):
         return False
+
+    # Seems inefficient. Any better way to do this?
+    if self.DEFINED_PROPERTIES_ONLY:
+      for name in self._data:
+        if name not in self._meta:
+          return False
+
     return True
 
   def invalids(self):
@@ -173,6 +196,11 @@ class EmDocument(object):
       if not self._validate_attribute(name):
         invalid.append(name)
 
+    # TODO: Refactor with is_valid
+    if self.DEFINED_PROPERTIES_ONLY:
+      for name in self._data:
+        if name not in self._meta:
+          invalid.append("_extra_props")
     return invalid
 
   def _validate_attribute(self, name):
@@ -274,7 +302,6 @@ class EmDocument(object):
       if name in self._meta:
         self._data[name] = None
       else:
-        print name
         del self._data[name]
     else:
       self._attribute_not_found(name)
