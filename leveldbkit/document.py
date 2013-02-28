@@ -57,6 +57,7 @@ class EmDocumentMetaclass(type):
         meta.update(p_cls._meta)
 
     attrs["_meta"] = meta
+    attrs["defined_property"] = meta.keys()
     if build_indexes:
       attrs["_indexes"] = indexes
     return type.__new__(cls, clsname, parents, attrs)
@@ -78,6 +79,7 @@ class EmDocument(object):
                                  `save` for Document) and False will be returned
                                  in `is_valid`. `invalids` will return
                                  `"_extra_props"` in the list.
+    - defined_properties: A list of defined properties. For read only.
   """
   __metaclass__ = EmDocumentMetaclass
 
