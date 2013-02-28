@@ -57,7 +57,7 @@ class EmDocumentMetaclass(type):
         meta.update(p_cls._meta)
 
     attrs["_meta"] = meta
-    attrs["defined_property"] = meta.keys()
+    attrs["defined_properties"] = meta.keys()
     if build_indexes:
       attrs["_indexes"] = indexes
     return type.__new__(cls, clsname, parents, attrs)
