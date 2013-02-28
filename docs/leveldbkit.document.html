@@ -73,7 +73,12 @@
 <td colspan=2><tt>The&nbsp;base&nbsp;<a href="#Document">Document</a>&nbsp;class&nbsp;for&nbsp;custom&nbsp;classes&nbsp;to&nbsp;extend&nbsp;from.<br>
 There&nbsp;are&nbsp;a&nbsp;couple&nbsp;of&nbsp;class&nbsp;variables&nbsp;that's&nbsp;required&nbsp;for&nbsp;this&nbsp;to&nbsp;work:<br>
 &nbsp;&nbsp;-&nbsp;`db`:&nbsp;a&nbsp;`leveldb.LevelDB`&nbsp;instance&nbsp;that&nbsp;points&nbsp;to&nbsp;the&nbsp;database.<br>
-&nbsp;&nbsp;-&nbsp;`indexdbs`:&nbsp;a&nbsp;dictionary:&nbsp;2i&nbsp;field&nbsp;=&gt;&nbsp;`leveldb.LevelDB`&nbsp;instance.<br>&nbsp;</tt></td></tr>
+&nbsp;&nbsp;-&nbsp;`indexdb`:&nbsp;a&nbsp;dictionary:&nbsp;2i&nbsp;field&nbsp;=&gt;&nbsp;`leveldb.LevelDB`&nbsp;instance.<br>
+&nbsp;&nbsp;-&nbsp;`OPEN_ONLY_WHEN_NEEDED`:&nbsp;This&nbsp;indicates&nbsp;that&nbsp;`db`&nbsp;and&nbsp;`indexdb`&nbsp;are&nbsp;paths<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;the&nbsp;database&nbsp;and&nbsp;it&nbsp;will&nbsp;only&nbsp;open&nbsp;when&nbsp;we<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;write&nbsp;(no&nbsp;more&nbsp;locks!&nbsp;although&nbsp;race&nbsp;conditions)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;day&nbsp;I'm&nbsp;gonna&nbsp;write&nbsp;a&nbsp;leveldb<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;server&nbsp;based&nbsp;off&nbsp;of&nbsp;https://github.com/srinikom/leveldb-server<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="leveldbkit.document.html#Document">Document</a></dd>
@@ -138,6 +143,8 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actually&nbsp;deleted&nbsp;when&nbsp;<a href="#Document">Document</a>.flush&nbsp;(replace&nbsp;<a href="#Document">Document</a>&nbsp;with&nbsp;your<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;name)&nbsp;is&nbsp;called.&nbsp;If&nbsp;True,&nbsp;sync&nbsp;and&nbsp;db&nbsp;will&nbsp;be&nbsp;ignored.</tt></dd></dl>
 
+<dl><dt><a name="Document-establish_connection"><strong>establish_connection</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt></dl>
+
 <dl><dt><a name="Document-flush"><strong>flush</strong></a>(cls, sync<font color="#909090">=True</font>, db<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Flushes&nbsp;all&nbsp;the&nbsp;batch&nbsp;operations.<br>
 &nbsp;<br>
 Args:<br>
@@ -190,11 +197,13 @@ Returns:<br>
 Raises:<br>
 &nbsp;&nbsp;DatabaseError&nbsp;if&nbsp;no&nbsp;index&nbsp;database&nbsp;is&nbsp;defined.</tt></dd></dl>
 
-<dl><dt><a name="Document-reset_write_batch"><strong>reset_write_batch</strong></a>(self)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Empties&nbsp;the&nbsp;current&nbsp;write&nbsp;batch.<br>
+<dl><dt><a name="Document-reset_write_batch"><strong>reset_write_batch</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Empties&nbsp;the&nbsp;current&nbsp;write&nbsp;batch.<br>
 This&nbsp;means&nbsp;all&nbsp;the&nbsp;current&nbsp;writes&nbsp;are&nbsp;void</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
+<dl><dt><strong>OPEN_ONLY_WHEN_NEEDED</strong> = False</dl>
+
 <dl><dt><strong>__metaclass__</strong> = &lt;class 'leveldbkit.document.DocumentMetaclass'&gt;</dl>
 
 <hr>
@@ -288,6 +297,10 @@ Data descriptors inherited from <a href="leveldbkit.document.html#EmDocument">Em
 <dl><dt><strong>__weakref__</strong></dt>
 <dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>
+<dl><dt><strong>DEFINED_PROPERTIES_ONLY</strong> = False</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -377,7 +390,16 @@ Data descriptors inherited from <a href="__builtin__.html#type">__builtin__.type
 <font color="#000000" face="helvetica, arial"><a name="EmDocument">class <strong>EmDocument</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Embedded&nbsp;document&nbsp;as&nbsp;a&nbsp;JSON&nbsp;<a href="__builtin__.html#object">object</a><br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>Embedded&nbsp;document&nbsp;as&nbsp;a&nbsp;JSON&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;<br>
+Class&nbsp;Variables:<br>
+&nbsp;&nbsp;-&nbsp;`DEFINED_PROPERTIES_ONLY`:&nbsp;A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;that&nbsp;the&nbsp;only<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties&nbsp;allowed&nbsp;are&nbsp;the&nbsp;ones&nbsp;defined.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults&nbsp;to&nbsp;False.&nbsp;If&nbsp;a&nbsp;violation&nbsp;is&nbsp;found,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;error&nbsp;will&nbsp;be&nbsp;raised&nbsp;on&nbsp;`serialize`&nbsp;(and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`save`&nbsp;for&nbsp;<a href="#Document">Document</a>)&nbsp;and&nbsp;False&nbsp;will&nbsp;be&nbsp;returned<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;`is_valid`.&nbsp;`invalids`&nbsp;will&nbsp;return<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`"_extra_props"`&nbsp;in&nbsp;the&nbsp;list.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="EmDocument-__delattr__"><strong>__delattr__</strong></a>(self, name)</dt></dl>
@@ -485,6 +507,8 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
+<dl><dt><strong>DEFINED_PROPERTIES_ONLY</strong> = False</dl>
+
 <dl><dt><strong>__metaclass__</strong> = &lt;class 'leveldbkit.document.EmDocumentMetaclass'&gt;</dl>
 
 </td></tr></table> <p>
