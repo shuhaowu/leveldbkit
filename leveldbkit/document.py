@@ -350,14 +350,18 @@ class Document(EmDocument):
 
   @classmethod
   def establish_connection(cls):
-    if cls.OPEN_ONLY_WHEN_NEEDED:
-      if hasattr(cls, "db"):
-        cls.db = LevelDB(cls.db)
+    """If you didn't specify a LevelDB instance and just a path, use this to
+    open a connection if OPEN_ONLY_WHEN_NEEDED is False. (It will also set it
+    to False). Calling this multiple times will not be bad as this checks if
+    cls.db/indexdb is a basestring or not.
+    """
+    if hasattr(cls, "db") and isinstance(cls.db, basestring):
+      cls.db = LevelDB(cls.db)
 
-      if hasattr(cls, "indexdb"):
-        cls.indexdb = LevelDB(cls.indexdb)
+    if hasattr(cls, "indexdb") and isinstance(cls.indexdb, basestring):
+      cls.indexdb = LevelDB(cls.indexdb)
 
-      cls.OPEN_ONLY_WHEN_NEEDED = False
+    cls.OPEN_ONLY_WHEN_NEEDED = False
 
   @classmethod
   def _get_indexdb(cls):
@@ -527,7 +531,7 @@ class Document(EmDocument):
         keys = json.loads(keys)
         for key in keys:
           yield cls(key).reload()
-
+          
 
   def clear(self, to_default=True):
     EmDocument.clear(self, to_default)

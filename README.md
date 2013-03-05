@@ -57,7 +57,7 @@ Installation
 ------------
 
 Install via `$ python setup.py install`. This should take care of dependencies.
-Install the optional dependencies if you'd like to take advantage of those 
+Install the optional dependencies if you'd like to take advantage of those
 features.
 
 Dependencies if you're just linking in:
@@ -76,9 +76,79 @@ Optional libraries that this thing tries to use
 Tutorial
 --------
 
-Will write one when I write an app for it and make this for reals. For now just
-browse through the source code and take a look at the riakkit tutorial (although
-the new version is not out you could see what kinda is the case).
+A long tutorial will appear soon.. This is just a short tutorial showing what
+leveldbkit could do. For more details, see the documentation.
+
+Let's build a simple app where users can post stuff! Except there will not be
+interface. (You can find the same thing here as userposts.py)
+
+    import leveldbkit
+    import re
+
+    _crappy_email_regex = re.compile("^[_.0-9a-z-]+@([0-9a-z][0-9a-z-]+.)+[a-z]{2,4}$")
+
+    # Let's assume that this is a good email validator!
+    email_validator = lambda email: _crappy_email_regex.match(email) is not None
+
+
+    class Post(leveldbkit.Document):
+      db = "./posts.db"
+
+      content = leveldbkit.StringProperty()
+
+    class User(leveldbkit.Document):
+      db = "./users.db" # This is the leveldb database that will be our users
+      indexdb = "./users.indexes.db" # This is the leveldb database for the secondary indices
+
+      name = leveldbkit.StringProperty() # a string property. Store any strings.
+      email = leveldbkit.StringProperty(validators=email_validator, index=True)
+      posts = leveldbkit.ListProperty(index=True)
+
+    if __name__ == "__main__":
+      # connect to db. You don't need to do this as you declare db
+      # and indexdb as LevelDB instances
+      User.establish_connection()
+      Post.establish_connection()
+
+      # creating a new user
+      user = User()
+      user.name = "Shuhao"
+      user.email = "shuhao@shuhaowu.com"
+      user.save()
+
+      # Finding me via my index: index is a generator:
+      for u in User.index("email", "shuhao@shuhaowu.com"):
+        shuhao = u # there is only 1.
+
+      print shuhao.name # Shuhao
+      print shuhao.email # shuhao@shuhaowu.com
+      print shuhao.key # ....some unique identifier
+
+      # Add a post
+
+      post = Post(data={"content": "Hello World!"})
+      shuhao.posts.append(post.key)
+      shuhao.save()
+
+      # Getting a user.
+      shuhao = User.get(user.key) # user.key is my key
+      print shuhao.posts # a list of keys..
+
+      # Look up the author of a post!
+      userkeys = User.index_keys_only("posts", post.key) # you could always use a simple index
+      print userkeys[0]
+      print shuhao.key # they're the same!
+
+      # Try an invalid email
+
+      user = User()
+      user.email = "invalid"
+      print user.is_valid() # False
+      print user.invalids() # A list of properties that are invalid: should ["email"]
+
+      # user.save() will raise ValidationError
 
 Reference
 ---------
+
+

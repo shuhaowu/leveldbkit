@@ -143,7 +143,10 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actually&nbsp;deleted&nbsp;when&nbsp;<a href="#Document">Document</a>.flush&nbsp;(replace&nbsp;<a href="#Document">Document</a>&nbsp;with&nbsp;your<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;name)&nbsp;is&nbsp;called.&nbsp;If&nbsp;True,&nbsp;sync&nbsp;and&nbsp;db&nbsp;will&nbsp;be&nbsp;ignored.</tt></dd></dl>
 
-<dl><dt><a name="Document-establish_connection"><strong>establish_connection</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt></dl>
+<dl><dt><a name="Document-establish_connection"><strong>establish_connection</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>If&nbsp;you&nbsp;didn't&nbsp;specify&nbsp;a&nbsp;LevelDB&nbsp;instance&nbsp;and&nbsp;just&nbsp;a&nbsp;path,&nbsp;use&nbsp;this&nbsp;to<br>
+open&nbsp;a&nbsp;connection&nbsp;if&nbsp;OPEN_ONLY_WHEN_NEEDED&nbsp;is&nbsp;False.&nbsp;(It&nbsp;will&nbsp;also&nbsp;set&nbsp;it<br>
+to&nbsp;False).&nbsp;Calling&nbsp;this&nbsp;multiple&nbsp;times&nbsp;will&nbsp;not&nbsp;be&nbsp;bad&nbsp;as&nbsp;this&nbsp;checks&nbsp;if<br>
+cls.db/indexdb&nbsp;is&nbsp;a&nbsp;basestring&nbsp;or&nbsp;not.</tt></dd></dl>
 
 <dl><dt><a name="Document-flush"><strong>flush</strong></a>(cls, sync<font color="#909090">=True</font>, db<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Flushes&nbsp;all&nbsp;the&nbsp;batch&nbsp;operations.<br>
 &nbsp;<br>
@@ -270,11 +273,17 @@ Args:<br>
 Returns:<br>
 &nbsp;&nbsp;self</tt></dd></dl>
 
-<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
+<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;dictionary:&nbsp;boolean.&nbsp;If&nbsp;True,&nbsp;this&nbsp;will&nbsp;return&nbsp;a&nbsp;dictionary,&nbsp;otherwise&nbsp;the<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary&nbsp;will&nbsp;be&nbsp;dumped&nbsp;by&nbsp;json.<br>
+&nbsp;&nbsp;restricted:&nbsp;The&nbsp;properties&nbsp;to&nbsp;not&nbsp;output&nbsp;in&nbsp;the&nbsp;serialized&nbsp;output.&nbsp;Useful<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scenarios&nbsp;where&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;info&nbsp;from&nbsp;something.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;example&nbsp;would&nbsp;be&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;some&nbsp;sort&nbsp;of&nbsp;token&nbsp;from<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;user&nbsp;but&nbsp;you&nbsp;need&nbsp;to&nbsp;return&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;them,&nbsp;without<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;token.&nbsp;This&nbsp;defaults&nbsp;to&nbsp;tuple(),&nbsp;which&nbsp;means&nbsp;nothing&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restricted.<br>
 Returns:<br>
 &nbsp;&nbsp;A&nbsp;plain&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;after&nbsp;all&nbsp;the&nbsp;conversion<br>
 &nbsp;&nbsp;to&nbsp;make&nbsp;it&nbsp;json&nbsp;friendly.</tt></dd></dl>
@@ -479,11 +488,17 @@ Args:<br>
 Returns:<br>
 &nbsp;&nbsp;self</tt></dd></dl>
 
-<dl><dt><a name="EmDocument-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
+<dl><dt><a name="EmDocument-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;dictionary:&nbsp;boolean.&nbsp;If&nbsp;True,&nbsp;this&nbsp;will&nbsp;return&nbsp;a&nbsp;dictionary,&nbsp;otherwise&nbsp;the<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary&nbsp;will&nbsp;be&nbsp;dumped&nbsp;by&nbsp;json.<br>
+&nbsp;&nbsp;restricted:&nbsp;The&nbsp;properties&nbsp;to&nbsp;not&nbsp;output&nbsp;in&nbsp;the&nbsp;serialized&nbsp;output.&nbsp;Useful<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scenarios&nbsp;where&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;info&nbsp;from&nbsp;something.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;example&nbsp;would&nbsp;be&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;some&nbsp;sort&nbsp;of&nbsp;token&nbsp;from<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;user&nbsp;but&nbsp;you&nbsp;need&nbsp;to&nbsp;return&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;them,&nbsp;without<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;token.&nbsp;This&nbsp;defaults&nbsp;to&nbsp;tuple(),&nbsp;which&nbsp;means&nbsp;nothing&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restricted.<br>
 Returns:<br>
 &nbsp;&nbsp;A&nbsp;plain&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;after&nbsp;all&nbsp;the&nbsp;conversion<br>
 &nbsp;&nbsp;to&nbsp;make&nbsp;it&nbsp;json&nbsp;friendly.</tt></dd></dl>

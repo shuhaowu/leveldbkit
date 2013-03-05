@@ -57,6 +57,9 @@ class DocumentDbOnDemand(Document):
 
   test = StringProperty()
 
+class DocumentLater(Document):
+  db = "{0}/test3.db".format(test_dir)
+
 class BasicDocumentTest(unittest.TestCase):
 
   def setUp(self):
@@ -179,6 +182,37 @@ class BasicDocumentTest(unittest.TestCase):
     _test_keys_only(self, None, "test_str_index", "quack")
     _test_keys_only(self, None, "test_number_index", 1336)
 
+  def test_2i_data_integrity(self):
+    doc = SomeDocument()
+    doc.test_str_index = "yay"
+    doc.save()
+    self.cleanups.append(doc)
+
+    a = doc.indexdb.Get("{}~{}".format("test_str_index", "yay"))
+    a = json.loads(a)
+    self.assertEquals(1, len(a))
+    self.assertEquals(doc.key, a)
+
+    another_doc = SomeDocument()
+    another_doc.test_str_index = "yay"
+    another_doc.save()
+    self.cleanups.append(another_doc)
+
+    a = doc.indexdb.Get("{}~{}".format("test_str_index", "yay"))
+    a = json.loads(a)
+    self.assertEquals(2, len(a))
+    self.assertTrue(doc.key in a)
+    self.assertTrue(another_doc.key in a)
+
+    # This better not shift the length to 3. heh.
+    doc.save()
+
+    a = doc.indexdb.Get("{}~{}".format("test_str_index", "yay"))
+    a = json.loads(a)
+    self.assertEquals(2, len(a))
+    self.assertTrue(doc.key in a)
+    self.assertTrue(another_doc.key in a)
+
   def test_2i_iterator(self):
     doc = SomeDocument()
     doc.test_str_index = "meow"
@@ -213,6 +247,10 @@ class BasicDocumentTest(unittest.TestCase):
     doc.save()
     db = leveldb.LevelDB(DocumentDbOnDemand.db)
     del db
+
+  def test_establish_db_connection_later(self):
+    DocumentLater.establish_connection()
+    self.assertTrue(isinstance(DocumentLater.db, leveldb.LevelDB))
 
   def test_2i_batch(self):
     doc = SomeDocument()
