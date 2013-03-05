@@ -1,0 +1,619 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module leveldbkit.document</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="leveldbkit.html"><font color="#ffffff">leveldbkit</font></a>.document</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/shuhao/Dropbox/RandomProjects/leveldbkit/leveldbkit/document.py">/home/shuhao/Dropbox/RandomProjects/leveldbkit/leveldbkit/document.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;-*-&nbsp;coding:&nbsp;utf-8&nbsp;-*-<br>
+#&nbsp;This&nbsp;file&nbsp;is&nbsp;part&nbsp;of&nbsp;Riakkit&nbsp;or&nbsp;Leveldbkit<br>
+#<br>
+#&nbsp;Riakkit&nbsp;or&nbsp;Leveldbkit&nbsp;is&nbsp;free&nbsp;software:&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and/or&nbsp;modify<br>
+#&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;Lesser&nbsp;General&nbsp;Public&nbsp;License&nbsp;as&nbsp;published&nbsp;by<br>
+#&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation,&nbsp;either&nbsp;version&nbsp;3&nbsp;of&nbsp;the&nbsp;License,&nbsp;or<br>
+#&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.<br>
+#<br>
+#&nbsp;Riakkit&nbsp;or&nbsp;Leveldbkit&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,<br>
+#&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of<br>
+#&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;See&nbsp;the<br>
+#&nbsp;GNU&nbsp;Lesser&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.<br>
+#<br>
+#&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;Lesser&nbsp;General&nbsp;Public&nbsp;License<br>
+#&nbsp;along&nbsp;with&nbsp;Riakkit&nbsp;or&nbsp;Leveldbkit.&nbsp;If&nbsp;not,&nbsp;see&nbsp;&lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="ujson.html">ujson</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="leveldbkit.document.html#EmDocument">EmDocument</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="leveldbkit.document.html#Document">Document</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#type">__builtin__.type</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="leveldbkit.document.html#EmDocumentMetaclass">EmDocumentMetaclass</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Document">class <strong>Document</strong></a>(<a href="leveldbkit.document.html#EmDocument">EmDocument</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>The&nbsp;base&nbsp;<a href="#Document">Document</a>&nbsp;class&nbsp;for&nbsp;custom&nbsp;classes&nbsp;to&nbsp;extend&nbsp;from.<br>
+There&nbsp;are&nbsp;a&nbsp;couple&nbsp;of&nbsp;class&nbsp;variables&nbsp;that's&nbsp;required&nbsp;for&nbsp;this&nbsp;to&nbsp;work:<br>
+&nbsp;&nbsp;-&nbsp;`db`:&nbsp;a&nbsp;`leveldb.LevelDB`&nbsp;instance&nbsp;that&nbsp;points&nbsp;to&nbsp;the&nbsp;database.<br>
+&nbsp;&nbsp;-&nbsp;`indexdb`:&nbsp;a&nbsp;dictionary:&nbsp;2i&nbsp;field&nbsp;=&gt;&nbsp;`leveldb.LevelDB`&nbsp;instance.<br>
+&nbsp;&nbsp;-&nbsp;`OPEN_ONLY_WHEN_NEEDED`:&nbsp;This&nbsp;indicates&nbsp;that&nbsp;`db`&nbsp;and&nbsp;`indexdb`&nbsp;are&nbsp;paths<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;the&nbsp;database&nbsp;and&nbsp;it&nbsp;will&nbsp;only&nbsp;open&nbsp;when&nbsp;we<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;write&nbsp;(no&nbsp;more&nbsp;locks!&nbsp;although&nbsp;race&nbsp;conditions)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;day&nbsp;I'm&nbsp;gonna&nbsp;write&nbsp;a&nbsp;leveldb<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;server&nbsp;based&nbsp;off&nbsp;of&nbsp;https://github.com/srinikom/leveldb-server<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="leveldbkit.document.html#Document">Document</a></dd>
+<dd><a href="leveldbkit.document.html#EmDocument">EmDocument</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Document-__init__"><strong>__init__</strong></a>(self, key<font color="#909090">=&lt;function &lt;lambda&gt;&gt;</font>, data<font color="#909090">={}</font>, db<font color="#909090">=None</font>)</dt><dd><tt>Creates&nbsp;a&nbsp;new&nbsp;instance&nbsp;of&nbsp;a&nbsp;document.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;key:&nbsp;the&nbsp;key&nbsp;to&nbsp;initialize&nbsp;this&nbsp;to.&nbsp;A&nbsp;function&nbsp;that&nbsp;takes&nbsp;no&nbsp;argument<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;also&nbsp;accepted&nbsp;and&nbsp;it&nbsp;should&nbsp;return&nbsp;the&nbsp;key&nbsp;for&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaults&nbsp;to&nbsp;generating&nbsp;uuid1&nbsp;as&nbsp;the&nbsp;key.<br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary&nbsp;to&nbsp;merge&nbsp;to.<br>
+&nbsp;&nbsp;db:&nbsp;A&nbsp;db&nbsp;other&nbsp;than&nbsp;the&nbsp;class&nbsp;database.&nbsp;However,&nbsp;if&nbsp;you&nbsp;use&nbsp;batch&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;be&nbsp;ignored.&nbsp;Defaults&nbsp;to&nbsp;the&nbsp;class&nbsp;db.</tt></dd></dl>
+
+<dl><dt><a name="Document-clear"><strong>clear</strong></a>(self, to_default<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="Document-delete"><strong>delete</strong></a>(self, sync<font color="#909090">=True</font>, db<font color="#909090">=None</font>, batch<font color="#909090">=False</font>)</dt><dd><tt>Deletes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;the&nbsp;database.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;sync:&nbsp;sync&nbsp;argument&nbsp;to&nbsp;pass&nbsp;to&nbsp;leveldb<br>
+&nbsp;&nbsp;db:&nbsp;The&nbsp;db&nbsp;to&nbsp;delete&nbsp;from.&nbsp;defaults&nbsp;to&nbsp;<a href="__builtin__.html#object">object</a>/class&nbsp;db<br>
+&nbsp;&nbsp;batch:&nbsp;If&nbsp;this&nbsp;is&nbsp;a&nbsp;batch&nbsp;operation.&nbsp;If&nbsp;True,&nbsp;it&nbsp;will&nbsp;be&nbsp;queued&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actually&nbsp;deleted&nbsp;when&nbsp;<a href="#Document">Document</a>.flush&nbsp;(replace&nbsp;<a href="#Document">Document</a>&nbsp;with&nbsp;your<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;name)&nbsp;is&nbsp;called.&nbsp;If&nbsp;True,&nbsp;sync&nbsp;and&nbsp;db&nbsp;will&nbsp;be&nbsp;ignored.<br>
+Returns:<br>
+&nbsp;&nbsp;self</tt></dd></dl>
+
+<dl><dt><a name="Document-deserialize"><strong>deserialize</strong></a>(self, data)</dt></dl>
+
+<dl><dt><a name="Document-reload"><strong>reload</strong></a>(self, verify_checksums<font color="#909090">=False</font>, fill_cache<font color="#909090">=True</font>, db<font color="#909090">=None</font>)</dt><dd><tt>Reloads&nbsp;the&nbsp;document&nbsp;from&nbsp;the&nbsp;database<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;verify_checksums:&nbsp;See&nbsp;pyleveldb's&nbsp;documentation<br>
+&nbsp;&nbsp;fill_cache:&nbsp;See&nbsp;pyleveldb's&nbsp;documentation<br>
+&nbsp;&nbsp;db:&nbsp;A&nbsp;`leveldb.LevelDB`&nbsp;instance&nbsp;to&nbsp;reload&nbsp;from.&nbsp;Defaults&nbsp;to&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="__builtin__.html#object">object</a>/class&nbsp;db.</tt></dd></dl>
+
+<dl><dt><a name="Document-save"><strong>save</strong></a>(self, sync<font color="#909090">=True</font>, db<font color="#909090">=None</font>, batch<font color="#909090">=False</font>)</dt><dd><tt>Saves&nbsp;the&nbsp;document&nbsp;to&nbsp;the&nbsp;database<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;sync:&nbsp;sync&nbsp;argument&nbsp;to&nbsp;pass&nbsp;to&nbsp;leveldb<br>
+&nbsp;&nbsp;db:&nbsp;The&nbsp;db&nbsp;to&nbsp;save&nbsp;to.&nbsp;defaults&nbsp;to&nbsp;<a href="__builtin__.html#object">object</a>/class&nbsp;db<br>
+&nbsp;&nbsp;batch:&nbsp;If&nbsp;this&nbsp;is&nbsp;a&nbsp;batch&nbsp;operation.&nbsp;If&nbsp;True,&nbsp;it&nbsp;will&nbsp;be&nbsp;queued&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actually&nbsp;stored&nbsp;when&nbsp;<a href="#Document">Document</a>.flush&nbsp;(replace&nbsp;<a href="#Document">Document</a>&nbsp;with&nbsp;your<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;name)&nbsp;is&nbsp;called.&nbsp;If&nbsp;True,&nbsp;sync&nbsp;and&nbsp;db&nbsp;will&nbsp;be&nbsp;ignored.<br>
+Returns:<br>
+&nbsp;&nbsp;self</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="Document-delete_key"><strong>delete_key</strong></a>(cls, key, sync<font color="#909090">=False</font>, db<font color="#909090">=None</font>, batch<font color="#909090">=False</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Delete&nbsp;something&nbsp;from&nbsp;the&nbsp;database&nbsp;without&nbsp;loading&nbsp;it.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;key:&nbsp;the&nbsp;key&nbsp;to&nbsp;delete.<br>
+&nbsp;&nbsp;sync:&nbsp;sync&nbsp;argument&nbsp;to&nbsp;pass&nbsp;to&nbsp;leveldb<br>
+&nbsp;&nbsp;db:&nbsp;The&nbsp;db&nbsp;to&nbsp;delete&nbsp;from.&nbsp;defaults&nbsp;to&nbsp;<a href="__builtin__.html#object">object</a>/class&nbsp;db<br>
+&nbsp;&nbsp;batch:&nbsp;If&nbsp;this&nbsp;is&nbsp;a&nbsp;batch&nbsp;operation.&nbsp;If&nbsp;True,&nbsp;it&nbsp;will&nbsp;be&nbsp;queued&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actually&nbsp;deleted&nbsp;when&nbsp;<a href="#Document">Document</a>.flush&nbsp;(replace&nbsp;<a href="#Document">Document</a>&nbsp;with&nbsp;your<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;name)&nbsp;is&nbsp;called.&nbsp;If&nbsp;True,&nbsp;sync&nbsp;and&nbsp;db&nbsp;will&nbsp;be&nbsp;ignored.</tt></dd></dl>
+
+<dl><dt><a name="Document-establish_connection"><strong>establish_connection</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>If&nbsp;you&nbsp;didn't&nbsp;specify&nbsp;a&nbsp;LevelDB&nbsp;instance&nbsp;and&nbsp;just&nbsp;a&nbsp;path,&nbsp;use&nbsp;this&nbsp;to<br>
+open&nbsp;a&nbsp;connection&nbsp;if&nbsp;OPEN_ONLY_WHEN_NEEDED&nbsp;is&nbsp;False.&nbsp;(It&nbsp;will&nbsp;also&nbsp;set&nbsp;it<br>
+to&nbsp;False).&nbsp;Calling&nbsp;this&nbsp;multiple&nbsp;times&nbsp;will&nbsp;not&nbsp;be&nbsp;bad&nbsp;as&nbsp;this&nbsp;checks&nbsp;if<br>
+cls.db/indexdb&nbsp;is&nbsp;a&nbsp;basestring&nbsp;or&nbsp;not.</tt></dd></dl>
+
+<dl><dt><a name="Document-flush"><strong>flush</strong></a>(cls, sync<font color="#909090">=True</font>, db<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Flushes&nbsp;all&nbsp;the&nbsp;batch&nbsp;operations.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;sync:&nbsp;sync&nbsp;argument&nbsp;to&nbsp;pass&nbsp;to&nbsp;leveldb.<br>
+&nbsp;&nbsp;db:&nbsp;The&nbsp;db&nbsp;to&nbsp;write&nbsp;to.&nbsp;Defaults&nbsp;to&nbsp;the&nbsp;default&nbsp;class&nbsp;database.&nbsp;The&nbsp;index<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dbs&nbsp;will&nbsp;not&nbsp;be&nbsp;affected.</tt></dd></dl>
+
+<dl><dt><a name="Document-get"><strong>get</strong></a>(cls, key, verify_checksums<font color="#909090">=False</font>, fill_cache<font color="#909090">=True</font>, db<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Gets&nbsp;a&nbsp;document&nbsp;from&nbsp;the&nbsp;database&nbsp;given&nbsp;a&nbsp;key.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;key:&nbsp;the&nbsp;key&nbsp;to&nbsp;get.<br>
+&nbsp;&nbsp;verify_checksums:&nbsp;See&nbsp;pyleveldb's&nbsp;documentation<br>
+&nbsp;&nbsp;fill_cache:&nbsp;See&nbsp;pyleveldb's&nbsp;documentation<br>
+&nbsp;&nbsp;db:&nbsp;A&nbsp;`leveldb.LevelDB`&nbsp;instance&nbsp;to&nbsp;get&nbsp;from.&nbsp;Defaults&nbsp;to&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>/class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;db.<br>
+Returns:<br>
+&nbsp;&nbsp;The&nbsp;document&nbsp;associated&nbsp;with&nbsp;that&nbsp;key.<br>
+Raises:<br>
+&nbsp;&nbsp;NotFoundError:&nbsp;when&nbsp;the&nbsp;key&nbsp;is&nbsp;not&nbsp;found&nbsp;in&nbsp;db.</tt></dd></dl>
+
+<dl><dt><a name="Document-get_or_new"><strong>get_or_new</strong></a>(cls, key, verify_checksums<font color="#909090">=False</font>, fill_cache<font color="#909090">=True</font>, db<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Gets&nbsp;a&nbsp;document&nbsp;from&nbsp;the&nbsp;database&nbsp;given&nbsp;a&nbsp;key.&nbsp;If&nbsp;not&nbsp;found,&nbsp;create&nbsp;one.<br>
+Note&nbsp;that&nbsp;this&nbsp;does&nbsp;not&nbsp;actually&nbsp;save.</tt></dd></dl>
+
+<dl><dt><a name="Document-index"><strong>index</strong></a>(cls, field, start_value, end_value<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Index&nbsp;lookup.&nbsp;Given&nbsp;a&nbsp;field&nbsp;and&nbsp;a&nbsp;value,&nbsp;find&nbsp;the&nbsp;associated&nbsp;documents<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;field:&nbsp;The&nbsp;field&nbsp;name<br>
+&nbsp;&nbsp;start_value:&nbsp;the&nbsp;value&nbsp;to&nbsp;look&nbsp;for,&nbsp;or&nbsp;the&nbsp;beginning&nbsp;value&nbsp;for&nbsp;a&nbsp;range<br>
+&nbsp;&nbsp;end_value:&nbsp;if&nbsp;not&nbsp;None,&nbsp;this&nbsp;is&nbsp;a&nbsp;ranged&nbsp;search,&nbsp;that&nbsp;is,&nbsp;all&nbsp;document&nbsp;with<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;field&nbsp;and&nbsp;value&nbsp;between&nbsp;start_value&nbsp;and&nbsp;end_value&nbsp;will&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;returned<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;generator&nbsp;that&nbsp;iterates&nbsp;through&nbsp;all&nbsp;the&nbsp;documents<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;DatabaseError&nbsp;if&nbsp;no&nbsp;index&nbsp;database&nbsp;is&nbsp;defined.</tt></dd></dl>
+
+<dl><dt><a name="Document-index_keys_only"><strong>index_keys_only</strong></a>(cls, field, start_value, end_value<font color="#909090">=None</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Index&nbsp;lookup.&nbsp;Given&nbsp;a&nbsp;field&nbsp;and&nbsp;a&nbsp;value,&nbsp;find&nbsp;the&nbsp;associated&nbsp;document<br>
+keys.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;field:&nbsp;The&nbsp;field&nbsp;name<br>
+&nbsp;&nbsp;start_value:&nbsp;the&nbsp;value&nbsp;to&nbsp;look&nbsp;for,&nbsp;or&nbsp;the&nbsp;beginning&nbsp;value&nbsp;for&nbsp;a&nbsp;range<br>
+&nbsp;&nbsp;end_value:&nbsp;if&nbsp;not&nbsp;None,&nbsp;this&nbsp;is&nbsp;a&nbsp;ranged&nbsp;search,&nbsp;that&nbsp;is,&nbsp;all&nbsp;document&nbsp;with<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;field&nbsp;and&nbsp;value&nbsp;between&nbsp;start_value&nbsp;and&nbsp;end_value&nbsp;will&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;returned<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;keys&nbsp;associated.<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;DatabaseError&nbsp;if&nbsp;no&nbsp;index&nbsp;database&nbsp;is&nbsp;defined.</tt></dd></dl>
+
+<dl><dt><a name="Document-reset_write_batch"><strong>reset_write_batch</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Empties&nbsp;the&nbsp;current&nbsp;write&nbsp;batch.<br>
+This&nbsp;means&nbsp;all&nbsp;the&nbsp;current&nbsp;writes&nbsp;are&nbsp;void</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>OPEN_ONLY_WHEN_NEEDED</strong> = False</dl>
+
+<dl><dt><strong>__metaclass__</strong> = &lt;class 'leveldbkit.document.DocumentMetaclass'&gt;</dl>
+
+<hr>
+Methods inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>
+<dl><dt><a name="Document-__delattr__"><strong>__delattr__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="Document-__delitem__"><strong>__delitem__</strong></a> = __delattr__(self, name)</dt></dl>
+
+<dl><dt><a name="Document-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt><dd><tt>Get&nbsp;an&nbsp;attribute&nbsp;from&nbsp;the&nbsp;document.<br>
+Note&nbsp;that&nbsp;if&nbsp;a&nbsp;property&nbsp;is&nbsp;defined&nbsp;and&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;set.&nbsp;This&nbsp;will<br>
+always&nbsp;return&nbsp;None.&nbsp;(Also&nbsp;remember&nbsp;that&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;not&nbsp;set&nbsp;by&nbsp;you&nbsp;it<br>
+does&nbsp;not&nbsp;mean&nbsp;that&nbsp;it&nbsp;is&nbsp;not&nbsp;initialized&nbsp;to&nbsp;its&nbsp;default&nbsp;value.)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;name:&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute.<br>
+Returns:<br>
+&nbsp;&nbsp;The&nbsp;value&nbsp;of&nbsp;the&nbsp;attribute.</tt></dd></dl>
+
+<dl><dt><a name="Document-__getitem__"><strong>__getitem__</strong></a> = __getattr__(self, name)</dt><dd><tt>Get&nbsp;an&nbsp;attribute&nbsp;from&nbsp;the&nbsp;document.<br>
+Note&nbsp;that&nbsp;if&nbsp;a&nbsp;property&nbsp;is&nbsp;defined&nbsp;and&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;set.&nbsp;This&nbsp;will<br>
+always&nbsp;return&nbsp;None.&nbsp;(Also&nbsp;remember&nbsp;that&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;not&nbsp;set&nbsp;by&nbsp;you&nbsp;it<br>
+does&nbsp;not&nbsp;mean&nbsp;that&nbsp;it&nbsp;is&nbsp;not&nbsp;initialized&nbsp;to&nbsp;its&nbsp;default&nbsp;value.)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;name:&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute.<br>
+Returns:<br>
+&nbsp;&nbsp;The&nbsp;value&nbsp;of&nbsp;the&nbsp;attribute.</tt></dd></dl>
+
+<dl><dt><a name="Document-__setattr__"><strong>__setattr__</strong></a>(self, name, value)</dt><dd><tt>Sets&nbsp;the&nbsp;attribute&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;calls&nbsp;`on_set`&nbsp;of&nbsp;the&nbsp;property<br>
+if&nbsp;the&nbsp;property&nbsp;is&nbsp;defined&nbsp;and&nbsp;it&nbsp;has&nbsp;an&nbsp;`on_set`&nbsp;method.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;name:&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute<br>
+&nbsp;&nbsp;value:&nbsp;the&nbsp;value&nbsp;of&nbsp;that&nbsp;attribute&nbsp;to&nbsp;set&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="Document-__setitem__"><strong>__setitem__</strong></a> = __setattr__(self, name, value)</dt><dd><tt>Sets&nbsp;the&nbsp;attribute&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;calls&nbsp;`on_set`&nbsp;of&nbsp;the&nbsp;property<br>
+if&nbsp;the&nbsp;property&nbsp;is&nbsp;defined&nbsp;and&nbsp;it&nbsp;has&nbsp;an&nbsp;`on_set`&nbsp;method.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;name:&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute<br>
+&nbsp;&nbsp;value:&nbsp;the&nbsp;value&nbsp;of&nbsp;that&nbsp;attribute&nbsp;to&nbsp;set&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="Document-invalids"><strong>invalids</strong></a>(self)</dt><dd><tt>Get&nbsp;all&nbsp;the&nbsp;attributes'&nbsp;names&nbsp;that&nbsp;are&nbsp;invalid.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;list&nbsp;of&nbsp;attribute&nbsp;names&nbsp;that&nbsp;have&nbsp;invalid&nbsp;values.</tt></dd></dl>
+
+<dl><dt><a name="Document-is_valid"><strong>is_valid</strong></a>(self)</dt><dd><tt>Test&nbsp;if&nbsp;all&nbsp;the&nbsp;attributes&nbsp;pass&nbsp;validation.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;True&nbsp;or&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="Document-merge"><strong>merge</strong></a>(self, data, merge_none<font color="#909090">=False</font>)</dt><dd><tt>Merge&nbsp;the&nbsp;data&nbsp;from&nbsp;a&nbsp;non-db&nbsp;source.<br>
+This&nbsp;method&nbsp;will&nbsp;treat&nbsp;all&nbsp;values&nbsp;with&nbsp;`None`&nbsp;as&nbsp;that&nbsp;it&nbsp;doesn't&nbsp;have<br>
+values&nbsp;unless&nbsp;`merge_none`&nbsp;is&nbsp;True.&nbsp;That&nbsp;is,&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;None&nbsp;and&nbsp;the&nbsp;key<br>
+that&nbsp;it&nbsp;is&nbsp;associated&nbsp;to&nbsp;is&nbsp;defined&nbsp;as&nbsp;a&nbsp;property,&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
+property&nbsp;will&nbsp;be&nbsp;used&nbsp;unless&nbsp;`merge_none&nbsp;==&nbsp;True`.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary&nbsp;to&nbsp;merge&nbsp;into&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;&nbsp;merge_none:&nbsp;Boolean.&nbsp;If&nbsp;set&nbsp;to&nbsp;True,&nbsp;None&nbsp;values&nbsp;will&nbsp;be&nbsp;merged&nbsp;as&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;instead&nbsp;of&nbsp;being&nbsp;converted&nbsp;into&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property.&nbsp;Defaults&nbsp;to&nbsp;False.<br>
+Returns:<br>
+&nbsp;&nbsp;self</tt></dd></dl>
+
+<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;dictionary:&nbsp;boolean.&nbsp;If&nbsp;True,&nbsp;this&nbsp;will&nbsp;return&nbsp;a&nbsp;dictionary,&nbsp;otherwise&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary&nbsp;will&nbsp;be&nbsp;dumped&nbsp;by&nbsp;json.<br>
+&nbsp;&nbsp;restricted:&nbsp;The&nbsp;properties&nbsp;to&nbsp;not&nbsp;output&nbsp;in&nbsp;the&nbsp;serialized&nbsp;output.&nbsp;Useful<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scenarios&nbsp;where&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;info&nbsp;from&nbsp;something.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;example&nbsp;would&nbsp;be&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;some&nbsp;sort&nbsp;of&nbsp;token&nbsp;from<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;user&nbsp;but&nbsp;you&nbsp;need&nbsp;to&nbsp;return&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;them,&nbsp;without<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;token.&nbsp;This&nbsp;defaults&nbsp;to&nbsp;tuple(),&nbsp;which&nbsp;means&nbsp;nothing&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restricted.<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;plain&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;after&nbsp;all&nbsp;the&nbsp;conversion<br>
+&nbsp;&nbsp;to&nbsp;make&nbsp;it&nbsp;json&nbsp;friendly.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>
+<dl><dt><a name="Document-load"><strong>load</strong></a>(cls, data)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>A&nbsp;convenient&nbsp;method&nbsp;that&nbsp;creates&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;deserializes&nbsp;the&nbsp;data.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;to&nbsp;be&nbsp;deserialized<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;document&nbsp;with&nbsp;the&nbsp;data&nbsp;deserialized.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>
+<dl><dt><strong>DEFINED_PROPERTIES_ONLY</strong> = False</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DocumentMetaclass">class <strong>DocumentMetaclass</strong></a>(<a href="leveldbkit.document.html#EmDocumentMetaclass">EmDocumentMetaclass</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></dd>
+<dd><a href="leveldbkit.document.html#EmDocumentMetaclass">EmDocumentMetaclass</a></dd>
+<dd><a href="__builtin__.html#type">__builtin__.type</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="DocumentMetaclass-__new__"><strong>__new__</strong></a>(cls, clsname, parents, attrs)</dt></dl>
+
+<hr>
+Methods inherited from <a href="leveldbkit.document.html#EmDocumentMetaclass">EmDocumentMetaclass</a>:<br>
+<dl><dt><a name="DocumentMetaclass-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt></dl>
+
+<hr>
+Methods inherited from <a href="__builtin__.html#type">__builtin__.type</a>:<br>
+<dl><dt><a name="DocumentMetaclass-__call__"><strong>__call__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__call__">__call__</a>(...)&nbsp;&lt;==&gt;&nbsp;x(...)</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__hash__">__hash__</a>()&nbsp;&lt;==&gt;&nbsp;hash(x)</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(<a href="__builtin__.html#type">type</a>(x))&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__instancecheck__"><strong>__instancecheck__</strong></a>(...)</dt><dd><tt><a href="#DocumentMetaclass-__instancecheck__">__instancecheck__</a>()&nbsp;-&gt;&nbsp;bool<br>
+check&nbsp;if&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;an&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#DocumentMetaclass-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__subclasscheck__"><strong>__subclasscheck__</strong></a>(...)</dt><dd><tt><a href="#DocumentMetaclass-__subclasscheck__">__subclasscheck__</a>()&nbsp;-&gt;&nbsp;bool<br>
+check&nbsp;if&nbsp;a&nbsp;class&nbsp;is&nbsp;a&nbsp;subclass</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-__subclasses__"><strong>__subclasses__</strong></a>(...)</dt><dd><tt><a href="#DocumentMetaclass-__subclasses__">__subclasses__</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;immediate&nbsp;subclasses</tt></dd></dl>
+
+<dl><dt><a name="DocumentMetaclass-mro"><strong>mro</strong></a>(...)</dt><dd><tt><a href="#DocumentMetaclass-mro">mro</a>()&nbsp;-&gt;&nbsp;list<br>
+return&nbsp;a&nbsp;<a href="__builtin__.html#type">type</a>'s&nbsp;method&nbsp;resolution&nbsp;order</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="__builtin__.html#type">__builtin__.type</a>:<br>
+<dl><dt><strong>__abstractmethods__</strong></dt>
+</dl>
+<dl><dt><strong>__base__</strong></dt>
+</dl>
+<dl><dt><strong>__bases__</strong></dt>
+</dl>
+<dl><dt><strong>__basicsize__</strong></dt>
+</dl>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>__dictoffset__</strong></dt>
+</dl>
+<dl><dt><strong>__flags__</strong></dt>
+</dl>
+<dl><dt><strong>__itemsize__</strong></dt>
+</dl>
+<dl><dt><strong>__mro__</strong></dt>
+</dl>
+<dl><dt><strong>__weakrefoffset__</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EmDocument">class <strong>EmDocument</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Embedded&nbsp;document&nbsp;as&nbsp;a&nbsp;JSON&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;<br>
+Class&nbsp;Variables:<br>
+&nbsp;&nbsp;-&nbsp;`DEFINED_PROPERTIES_ONLY`:&nbsp;A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;that&nbsp;the&nbsp;only<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties&nbsp;allowed&nbsp;are&nbsp;the&nbsp;ones&nbsp;defined.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults&nbsp;to&nbsp;False.&nbsp;If&nbsp;a&nbsp;violation&nbsp;is&nbsp;found,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;error&nbsp;will&nbsp;be&nbsp;raised&nbsp;on&nbsp;`serialize`&nbsp;(and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`save`&nbsp;for&nbsp;<a href="#Document">Document</a>)&nbsp;and&nbsp;False&nbsp;will&nbsp;be&nbsp;returned<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;`is_valid`.&nbsp;`invalids`&nbsp;will&nbsp;return<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`"_extra_props"`&nbsp;in&nbsp;the&nbsp;list.<br>
+&nbsp;&nbsp;-&nbsp;defined_properties:&nbsp;A&nbsp;list&nbsp;of&nbsp;defined&nbsp;properties.&nbsp;For&nbsp;read&nbsp;only.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="EmDocument-__delattr__"><strong>__delattr__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="EmDocument-__delitem__"><strong>__delitem__</strong></a> = <a href="#EmDocument-__delattr__">__delattr__</a>(self, name)</dt></dl>
+
+<dl><dt><a name="EmDocument-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt><dd><tt>Get&nbsp;an&nbsp;attribute&nbsp;from&nbsp;the&nbsp;document.<br>
+Note&nbsp;that&nbsp;if&nbsp;a&nbsp;property&nbsp;is&nbsp;defined&nbsp;and&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;set.&nbsp;This&nbsp;will<br>
+always&nbsp;return&nbsp;None.&nbsp;(Also&nbsp;remember&nbsp;that&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;not&nbsp;set&nbsp;by&nbsp;you&nbsp;it<br>
+does&nbsp;not&nbsp;mean&nbsp;that&nbsp;it&nbsp;is&nbsp;not&nbsp;initialized&nbsp;to&nbsp;its&nbsp;default&nbsp;value.)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;name:&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute.<br>
+Returns:<br>
+&nbsp;&nbsp;The&nbsp;value&nbsp;of&nbsp;the&nbsp;attribute.</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-__getitem__"><strong>__getitem__</strong></a> = <a href="#EmDocument-__getattr__">__getattr__</a>(self, name)</dt></dl>
+
+<dl><dt><a name="EmDocument-__init__"><strong>__init__</strong></a>(self, data<font color="#909090">={}</font>)</dt><dd><tt>Initializes&nbsp;a&nbsp;new&nbsp;<a href="#EmDocument">EmDocument</a><br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;data:&nbsp;A&nbsp;dictionary&nbsp;that's&nbsp;supposed&nbsp;to&nbsp;be&nbsp;initialized&nbsp;with&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document&nbsp;as&nbsp;attributes.</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-__setattr__"><strong>__setattr__</strong></a>(self, name, value)</dt><dd><tt>Sets&nbsp;the&nbsp;attribute&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;calls&nbsp;`on_set`&nbsp;of&nbsp;the&nbsp;property<br>
+if&nbsp;the&nbsp;property&nbsp;is&nbsp;defined&nbsp;and&nbsp;it&nbsp;has&nbsp;an&nbsp;`on_set`&nbsp;method.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;name:&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute<br>
+&nbsp;&nbsp;value:&nbsp;the&nbsp;value&nbsp;of&nbsp;that&nbsp;attribute&nbsp;to&nbsp;set&nbsp;to.</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-__setitem__"><strong>__setitem__</strong></a> = <a href="#EmDocument-__setattr__">__setattr__</a>(self, name, value)</dt></dl>
+
+<dl><dt><a name="EmDocument-clear"><strong>clear</strong></a>(self, to_default<font color="#909090">=True</font>)</dt><dd><tt>Clears&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;Set&nbsp;all&nbsp;attributes&nbsp;to&nbsp;default&nbsp;or&nbsp;nothing.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;to_default:&nbsp;Boolean.&nbsp;If&nbsp;True,&nbsp;all&nbsp;properties&nbsp;defined&nbsp;will&nbsp;be&nbsp;set&nbsp;to&nbsp;its<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default&nbsp;value.&nbsp;Otherwise&nbsp;the&nbsp;document&nbsp;will&nbsp;be&nbsp;empty.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;self</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-deserialize"><strong>deserialize</strong></a>(self, data)</dt><dd><tt>Deserializes&nbsp;the&nbsp;data.&nbsp;This&nbsp;uses&nbsp;the&nbsp;`from_db`&nbsp;method&nbsp;of&nbsp;all&nbsp;the<br>
+properties.&nbsp;This&nbsp;differs&nbsp;from&nbsp;`merge`&nbsp;as&nbsp;this&nbsp;assumes&nbsp;that&nbsp;the&nbsp;data&nbsp;is&nbsp;from<br>
+the&nbsp;database&nbsp;and&nbsp;will&nbsp;convert&nbsp;from&nbsp;db&nbsp;whereas&nbsp;merge&nbsp;assumes&nbsp;the&nbsp;the&nbsp;data<br>
+is&nbsp;from&nbsp;input&nbsp;and&nbsp;will&nbsp;not&nbsp;do&nbsp;anything&nbsp;to&nbsp;it.&nbsp;(unless&nbsp;the&nbsp;property&nbsp;has<br>
+`on_set`).<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary&nbsp;from&nbsp;the&nbsp;database.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;self,&nbsp;with&nbsp;its&nbsp;attributes&nbsp;populated.</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-invalids"><strong>invalids</strong></a>(self)</dt><dd><tt>Get&nbsp;all&nbsp;the&nbsp;attributes'&nbsp;names&nbsp;that&nbsp;are&nbsp;invalid.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;list&nbsp;of&nbsp;attribute&nbsp;names&nbsp;that&nbsp;have&nbsp;invalid&nbsp;values.</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-is_valid"><strong>is_valid</strong></a>(self)</dt><dd><tt>Test&nbsp;if&nbsp;all&nbsp;the&nbsp;attributes&nbsp;pass&nbsp;validation.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;True&nbsp;or&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-merge"><strong>merge</strong></a>(self, data, merge_none<font color="#909090">=False</font>)</dt><dd><tt>Merge&nbsp;the&nbsp;data&nbsp;from&nbsp;a&nbsp;non-db&nbsp;source.<br>
+This&nbsp;method&nbsp;will&nbsp;treat&nbsp;all&nbsp;values&nbsp;with&nbsp;`None`&nbsp;as&nbsp;that&nbsp;it&nbsp;doesn't&nbsp;have<br>
+values&nbsp;unless&nbsp;`merge_none`&nbsp;is&nbsp;True.&nbsp;That&nbsp;is,&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;None&nbsp;and&nbsp;the&nbsp;key<br>
+that&nbsp;it&nbsp;is&nbsp;associated&nbsp;to&nbsp;is&nbsp;defined&nbsp;as&nbsp;a&nbsp;property,&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
+property&nbsp;will&nbsp;be&nbsp;used&nbsp;unless&nbsp;`merge_none&nbsp;==&nbsp;True`.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary&nbsp;to&nbsp;merge&nbsp;into&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;&nbsp;merge_none:&nbsp;Boolean.&nbsp;If&nbsp;set&nbsp;to&nbsp;True,&nbsp;None&nbsp;values&nbsp;will&nbsp;be&nbsp;merged&nbsp;as&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;instead&nbsp;of&nbsp;being&nbsp;converted&nbsp;into&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property.&nbsp;Defaults&nbsp;to&nbsp;False.<br>
+Returns:<br>
+&nbsp;&nbsp;self</tt></dd></dl>
+
+<dl><dt><a name="EmDocument-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;dictionary:&nbsp;boolean.&nbsp;If&nbsp;True,&nbsp;this&nbsp;will&nbsp;return&nbsp;a&nbsp;dictionary,&nbsp;otherwise&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary&nbsp;will&nbsp;be&nbsp;dumped&nbsp;by&nbsp;json.<br>
+&nbsp;&nbsp;restricted:&nbsp;The&nbsp;properties&nbsp;to&nbsp;not&nbsp;output&nbsp;in&nbsp;the&nbsp;serialized&nbsp;output.&nbsp;Useful<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scenarios&nbsp;where&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;info&nbsp;from&nbsp;something.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;example&nbsp;would&nbsp;be&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;some&nbsp;sort&nbsp;of&nbsp;token&nbsp;from<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;user&nbsp;but&nbsp;you&nbsp;need&nbsp;to&nbsp;return&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;them,&nbsp;without<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;token.&nbsp;This&nbsp;defaults&nbsp;to&nbsp;tuple(),&nbsp;which&nbsp;means&nbsp;nothing&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restricted.<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;plain&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;after&nbsp;all&nbsp;the&nbsp;conversion<br>
+&nbsp;&nbsp;to&nbsp;make&nbsp;it&nbsp;json&nbsp;friendly.</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="EmDocument-load"><strong>load</strong></a>(cls, data)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#EmDocumentMetaclass">EmDocumentMetaclass</a></font></font></dt><dd><tt>A&nbsp;convenient&nbsp;method&nbsp;that&nbsp;creates&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;deserializes&nbsp;the&nbsp;data.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;to&nbsp;be&nbsp;deserialized<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;A&nbsp;document&nbsp;with&nbsp;the&nbsp;data&nbsp;deserialized.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>DEFINED_PROPERTIES_ONLY</strong> = False</dl>
+
+<dl><dt><strong>__metaclass__</strong> = &lt;class 'leveldbkit.document.EmDocumentMetaclass'&gt;</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EmDocumentMetaclass">class <strong>EmDocumentMetaclass</strong></a>(<a href="__builtin__.html#type">__builtin__.type</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="leveldbkit.document.html#EmDocumentMetaclass">EmDocumentMetaclass</a></dd>
+<dd><a href="__builtin__.html#type">__builtin__.type</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="EmDocumentMetaclass-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="EmDocumentMetaclass-__new__"><strong>__new__</strong></a>(cls, clsname, parents, attrs, build_indexes<font color="#909090">=False</font>)</dt></dl>
+
+<hr>
+Methods inherited from <a href="__builtin__.html#type">__builtin__.type</a>:<br>
+<dl><dt><a name="EmDocumentMetaclass-__call__"><strong>__call__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__call__">__call__</a>(...)&nbsp;&lt;==&gt;&nbsp;x(...)</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__ge__"><strong>__ge__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__ge__">__ge__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;=y</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__hash__">__hash__</a>()&nbsp;&lt;==&gt;&nbsp;hash(x)</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(<a href="__builtin__.html#type">type</a>(x))&nbsp;for&nbsp;signature</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__instancecheck__"><strong>__instancecheck__</strong></a>(...)</dt><dd><tt><a href="#EmDocumentMetaclass-__instancecheck__">__instancecheck__</a>()&nbsp;-&gt;&nbsp;bool<br>
+check&nbsp;if&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;an&nbsp;instance</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__le__"><strong>__le__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__le__">__le__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;=y</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#EmDocumentMetaclass-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__subclasscheck__"><strong>__subclasscheck__</strong></a>(...)</dt><dd><tt><a href="#EmDocumentMetaclass-__subclasscheck__">__subclasscheck__</a>()&nbsp;-&gt;&nbsp;bool<br>
+check&nbsp;if&nbsp;a&nbsp;class&nbsp;is&nbsp;a&nbsp;subclass</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-__subclasses__"><strong>__subclasses__</strong></a>(...)</dt><dd><tt><a href="#EmDocumentMetaclass-__subclasses__">__subclasses__</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;immediate&nbsp;subclasses</tt></dd></dl>
+
+<dl><dt><a name="EmDocumentMetaclass-mro"><strong>mro</strong></a>(...)</dt><dd><tt><a href="#EmDocumentMetaclass-mro">mro</a>()&nbsp;-&gt;&nbsp;list<br>
+return&nbsp;a&nbsp;<a href="__builtin__.html#type">type</a>'s&nbsp;method&nbsp;resolution&nbsp;order</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="__builtin__.html#type">__builtin__.type</a>:<br>
+<dl><dt><strong>__abstractmethods__</strong></dt>
+</dl>
+<dl><dt><strong>__base__</strong></dt>
+</dl>
+<dl><dt><strong>__bases__</strong></dt>
+</dl>
+<dl><dt><strong>__basicsize__</strong></dt>
+</dl>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>__dictoffset__</strong></dt>
+</dl>
+<dl><dt><strong>__flags__</strong></dt>
+</dl>
+<dl><dt><strong>__itemsize__</strong></dt>
+</dl>
+<dl><dt><strong>__mro__</strong></dt>
+</dl>
+<dl><dt><strong>__weakrefoffset__</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>absolute_import</strong> = _Feature((2, 5, 0, 'alpha', 1), (2, 7, 0, 'alpha', 0), 16384)</td></tr></table>
+</body></html>
