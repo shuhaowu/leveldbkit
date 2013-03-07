@@ -191,7 +191,7 @@ class BasicDocumentTest(unittest.TestCase):
     a = doc.indexdb.Get("{}~{}".format("test_str_index", "yay"))
     a = json.loads(a)
     self.assertEquals(1, len(a))
-    self.assertEquals(doc.key, a)
+    self.assertEquals(doc.key, a[0])
 
     another_doc = SomeDocument()
     another_doc.test_str_index = "yay"

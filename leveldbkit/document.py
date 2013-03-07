@@ -419,7 +419,7 @@ class Document(EmDocument):
 
     self.__dict__["key"] = key
     EmDocument.__init__(self, data)
-    self.__dict__["db"] = db or self.__class__.db
+    self.__dict__["db"] = db
     self.__dict__["_old_indexes"] = {}
 
   @classmethod
@@ -531,7 +531,7 @@ class Document(EmDocument):
         keys = json.loads(keys)
         for key in keys:
           yield cls(key).reload()
-          
+
 
   def clear(self, to_default=True):
     EmDocument.clear(self, to_default)
