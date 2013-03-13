@@ -224,7 +224,7 @@ class ReferenceProperty(BaseProperty):
 
   def validate(self, value):
     return BaseProperty.validate(self, value) and \
-           isinstance(value, self.reference_class)
+           (value is None or isinstance(value, self.reference_class))
 
   def to_db(self, value):
     if value is None or isinstance(value, basestring):
@@ -233,6 +233,9 @@ class ReferenceProperty(BaseProperty):
     return value.key
 
   def from_db(self, value):
+    if value is None:
+      return None
+    
     try:
       doc = self.reference_class.get(value)
     except NotFoundError, e:

@@ -22,7 +22,7 @@ import unittest
 from datetime import datetime
 import time
 
-from ..document import EmDocument
+from ..document import EmDocument, Document
 
 from ..properties.standard import (
   BaseProperty,
@@ -46,6 +46,9 @@ from ..exceptions import ValidationError
 
 class Embedded(EmDocument):
   i = NumberProperty(required=True)
+
+class Doc(Document):
+  db = "test.db"
 
 class StandardPropertiesTest(unittest.TestCase):
   def test_default(self):
@@ -206,6 +209,19 @@ class StandardPropertiesTest(unittest.TestCase):
     self.assertEquals(2, len(docs))
     self.assertEquals(5, docs[0].i)
     self.assertEquals(6, docs[1].i)
+
+  def test_referenceprop(self):
+    prop = ReferenceProperty(Doc)
+    self.assertEquals(None, prop.default())
+    self.assertEquals(None, prop.to_db(None))
+    self.assertEquals(None, prop.from_db(None))
+    self.assertTrue(prop.validate(None))
+
+    doc = Doc()
+    self.assertTrue(prop.validate(doc))
+    self.assertTrue(doc.key, prop.to_db(doc))
+
+    # Need to test getting from db and all that.
 
 class FancyPropertiesTest(unittest.TestCase):
   def test_enumprop(self):
