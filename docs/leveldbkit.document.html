@@ -131,6 +131,14 @@ Args:<br>
 Returns:<br>
 &nbsp;&nbsp;self</tt></dd></dl>
 
+<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>, include_keys<font color="#909090">=False</font>)</dt><dd><tt>Serializes&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;Doc&nbsp;same&nbsp;as&nbsp;`<a href="#EmDocument">EmDocument</a>.serialize`&nbsp;except&nbsp;there<br>
+is&nbsp;an&nbsp;extra&nbsp;argument.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;Same&nbsp;as&nbsp;<a href="#EmDocument">EmDocument</a>&nbsp;other&nbsp;the&nbsp;following&nbsp;addition:<br>
+&nbsp;&nbsp;include_keys:&nbsp;A&nbsp;boolean&nbsp;indicate&nbsp;if&nbsp;the&nbsp;key&nbsp;should&nbsp;be&nbsp;serialized&nbsp;under<br>
+&nbsp;&nbsp;"key".&nbsp;Defaults&nbsp;to&nbsp;False.</tt></dd></dl>
+
 <hr>
 Class methods defined here:<br>
 <dl><dt><a name="Document-delete_key"><strong>delete_key</strong></a>(cls, key, sync<font color="#909090">=False</font>, db<font color="#909090">=None</font>, batch<font color="#909090">=False</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Delete&nbsp;something&nbsp;from&nbsp;the&nbsp;database&nbsp;without&nbsp;loading&nbsp;it.<br>
@@ -272,21 +280,6 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property.&nbsp;Defaults&nbsp;to&nbsp;False.<br>
 Returns:<br>
 &nbsp;&nbsp;self</tt></dd></dl>
-
-<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
-&nbsp;<br>
-Args:<br>
-&nbsp;&nbsp;dictionary:&nbsp;boolean.&nbsp;If&nbsp;True,&nbsp;this&nbsp;will&nbsp;return&nbsp;a&nbsp;dictionary,&nbsp;otherwise&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary&nbsp;will&nbsp;be&nbsp;dumped&nbsp;by&nbsp;json.<br>
-&nbsp;&nbsp;restricted:&nbsp;The&nbsp;properties&nbsp;to&nbsp;not&nbsp;output&nbsp;in&nbsp;the&nbsp;serialized&nbsp;output.&nbsp;Useful<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scenarios&nbsp;where&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;info&nbsp;from&nbsp;something.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;example&nbsp;would&nbsp;be&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;some&nbsp;sort&nbsp;of&nbsp;token&nbsp;from<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;user&nbsp;but&nbsp;you&nbsp;need&nbsp;to&nbsp;return&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;them,&nbsp;without<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;token.&nbsp;This&nbsp;defaults&nbsp;to&nbsp;tuple(),&nbsp;which&nbsp;means&nbsp;nothing&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restricted.<br>
-Returns:<br>
-&nbsp;&nbsp;A&nbsp;plain&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;after&nbsp;all&nbsp;the&nbsp;conversion<br>
-&nbsp;&nbsp;to&nbsp;make&nbsp;it&nbsp;json&nbsp;friendly.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>

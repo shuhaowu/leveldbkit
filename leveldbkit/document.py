@@ -533,6 +533,7 @@ class Document(EmDocument):
           yield cls(key).reload()
 
 
+
   def clear(self, to_default=True):
     EmDocument.clear(self, to_default)
     self._indexes = set()
@@ -704,6 +705,22 @@ class Document(EmDocument):
 
     self.clear(False)
     return self
+
+  def serialize(self, dictionary=True, restricted=tuple(), include_keys=False):
+    """Serializes this object. Doc same as `EmDocument.serialize` except there
+    is an extra argument.
+
+    Args:
+      Same as EmDocument other the following addition:
+      include_keys: A boolean indicate if the key should be serialized under
+      "key". Defaults to False.
+    """
+    if include_keys:
+      d = EmDocument.serialize(self, dictionary, restricted)
+      d["key"] = self.key
+      return d
+    else:
+      return EmDocument.serialize(self, dictionary, restricted)
 
   def deserialize(self, data):
     self._old_indexes = self._build_indexes(data)
