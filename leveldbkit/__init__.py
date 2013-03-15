@@ -21,7 +21,7 @@ from __future__ import absolute_import
 
 from .document import EmDocument, Document
 from .exceptions import *
-from .properties.standard import BaseProperty, BooleanProperty, DictProperty, EmDocumentProperty, EmDocumentsListProperty, ListProperty, NumberProperty, ReferenceProperty, StringProperty
+from .properties.standard import BaseProperty, BooleanProperty, DictProperty, EmDocumentProperty, EmDocumentsListProperty, ListProperty, NumberProperty, ReferenceProperty, StringProperty, Property
 from .properties.fancy import EnumProperty, DateTimeProperty, PasswordProperty
 
 # PEP 386 versioning

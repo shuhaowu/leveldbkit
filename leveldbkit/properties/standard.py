@@ -101,6 +101,9 @@ class BaseProperty(object):
 
     return None if self._default is _NOUNCE else self._default
 
+# Alias this for simplicity when declaring a dynamic property.
+Property = BaseProperty
+
 # standard properties... boring stuff
 # This are strict, if you want to relax, use Property instead.
 
@@ -235,7 +238,7 @@ class ReferenceProperty(BaseProperty):
   def from_db(self, value):
     if value is None:
       return None
-    
+
     try:
       doc = self.reference_class.get(value)
     except NotFoundError, e:
