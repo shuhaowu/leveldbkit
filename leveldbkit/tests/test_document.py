@@ -20,7 +20,7 @@ import unittest
 import os.path
 
 from ..properties import *
-from ..document import Document
+from ..document import Document, EmDocument
 from ..exceptions import NotFoundError
 
 import json
@@ -60,8 +60,13 @@ class DocumentDbOnDemand(Document):
 class DocumentLater(Document):
   db = "{0}/test3.db".format(test_dir)
 
-class BasicDocumentTest(unittest.TestCase):
+class Mixin(EmDocument):
+  test = StringProperty(validators=lambda v: v == "test")
 
+class DocumentWithMixin(Document, Mixin):
+  db = leveldb.LevelDB("{0}/mixin.db".format(test_dir))
+
+class BasicDocumentTest(unittest.TestCase):
   def setUp(self):
     if not hasattr(self, "cleanups"):
       self.cleanups = []
@@ -115,6 +120,19 @@ class BasicDocumentTest(unittest.TestCase):
 
     with self.assertRaises(NotFoundError):
       SomeDocument.get(doc.key)
+
+  def test_document_mixin(self):
+    doc = DocumentWithMixin()
+    doc.test = "test"
+    self.assertTrue(doc.is_valid())
+    doc.test = "lols"
+    self.assertFalse(doc.is_valid())
+    doc.test = "test"
+    doc.save()
+    self.cleanups.append(doc)
+    
+    doc2 = DocumentWithMixin.get(doc.key)
+    self.assertEqual("test", doc2.test)
 
   def test_reference_document(self):
     doc = SomeDocument()
