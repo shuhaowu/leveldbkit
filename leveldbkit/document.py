@@ -719,7 +719,7 @@ class Document(EmDocument):
     if include_key:
       d = EmDocument.serialize(self, True, restricted)
       d["key"] = self.key
-      if dictionary:
+      if not dictionary:
         return json.dumps(d)
       return d
     else:

@@ -50,7 +50,7 @@ setup(
     keywords="leveldb object mapper leveldbkit database orm",
     url=__url__,
     packages=find_packages(),
-    install_requires=['leveldb'],
+    install_requires=[],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
