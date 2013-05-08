@@ -560,6 +560,7 @@ class Document(EmDocument):
     self.deserialize(value)
     return self
 
+
   def _add_to_index_write_batch(self, field, value):
     if value is None: # We value is null. This is a refactoring step.
       return
@@ -706,18 +707,20 @@ class Document(EmDocument):
     self.clear(False)
     return self
 
-  def serialize(self, dictionary=True, restricted=tuple(), include_keys=False):
+  def serialize(self, dictionary=True, restricted=tuple(), include_key=False):
     """Serializes this object. Doc same as `EmDocument.serialize` except there
     is an extra argument.
 
     Args:
       Same as EmDocument other the following addition:
-      include_keys: A boolean indicate if the key should be serialized under
+      include_key: A boolean indicate if the key should be serialized under
       "key". Defaults to False.
     """
-    if include_keys:
-      d = EmDocument.serialize(self, dictionary, restricted)
+    if include_key:
+      d = EmDocument.serialize(self, True, restricted)
       d["key"] = self.key
+      if dictionary:
+        return json.dumps(d)
       return d
     else:
       return EmDocument.serialize(self, dictionary, restricted)
