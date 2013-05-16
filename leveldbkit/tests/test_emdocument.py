@@ -37,6 +37,9 @@ class DefinedOnlyDocument(EmDocument):
 
   prop = StringProperty()
 
+class OverrideDocument(DefinedOnlyDocument):
+  prop = NumberProperty()
+
 class DocumentWithLoadOnDemand(EmDocument):
   d = EmDocumentProperty(SimpleDocument, load_on_demand=True)
 
@@ -185,6 +188,9 @@ class EmDocumentTest(unittest.TestCase):
     self.assertFalse("sr" in serialized)
     self.assertFalse("sv" in serialized)
     self.assertTrue("sd" in serialized)
+
+  def test_override_document(self):
+    self.assertTrue(isinstance(OverrideDocument._meta["prop"], NumberProperty))
 
 
 if __name__ == "__main__":
