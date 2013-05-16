@@ -130,7 +130,7 @@ class BasicDocumentTest(unittest.TestCase):
     doc.test = "test"
     doc.save()
     self.cleanups.append(doc)
-    
+
     doc2 = DocumentWithMixin.get(doc.key)
     self.assertEqual("test", doc2.test)
 
@@ -286,6 +286,14 @@ class BasicDocumentTest(unittest.TestCase):
     v = json.loads(v)
     self.assertEquals(1, len(v))
     self.assertEquals(doc.key, v[0])
+
+  def test_serialize_expand(self):
+    doc = DocumentWithRef()
+    doc.ref = SomeDocument()
+
+    serialized = doc.serialize(expand=[{}])
+    self.assertTrue(isinstance(serialized["ref"], dict))
+
 
 
 if __name__ == "__main__":

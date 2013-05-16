@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import
 try:
+  # We prefer ujson, then simplejson, then json
   import ujson as json
 except ImportError:
   try:
@@ -707,7 +708,7 @@ class Document(EmDocument):
     self.clear(False)
     return self
 
-  def serialize(self, dictionary=True, restricted=tuple(), include_key=False):
+  def serialize(self, dictionary=True, restricted=tuple(), include_key=False, expand=[]):
     """Serializes this object. Doc same as `EmDocument.serialize` except there
     is an extra argument.
 
@@ -715,15 +716,36 @@ class Document(EmDocument):
       Same as EmDocument other the following addition:
       include_key: A boolean indicate if the key should be serialized under
       "key". Defaults to False.
+      expand: Defaults to an empty list. If this list is empty, all reference
+              property will be serialized as keys.
+              The list holds a list of dictionaries. These are the arguments to
+              this method without the `expand`. The number of arguments will be
+              the number of layers to expand down. For example, if there are two
+              dictionaries of arguments, it will expand two levels down (that is,
+              it will look at any reference properties for the immediate object
+              and any reference properties of those objects). The order of the
+              list is so that level 1 would be the first argument, level 2 the
+              second and so forth.
     """
     if include_key:
       d = EmDocument.serialize(self, True, restricted)
       d["key"] = self.key
-      if not dictionary:
-        return json.dumps(d)
-      return d
     else:
-      return EmDocument.serialize(self, dictionary, restricted)
+      d = EmDocument.serialize(self, True, restricted)
+
+    if len(expand) > 0:
+      kwargs = expand.pop(0)
+      for name, attr in self._meta.iteritems():
+        if isinstance(attr, ReferenceProperty):
+          # we copy to make sure that there is no weird bug when we pop at
+          # different points of the stack. Shallow copy is good enough as the
+          # dicts themselves are readonly.
+          kwargs["expand"] = copy(expand)
+          d[name] = self[name].serialize(**kwargs)
+
+    if not dictionary:
+      return json.dumps(d)
+    return d
 
   def deserialize(self, data):
     self._old_indexes = self._build_indexes(data)
