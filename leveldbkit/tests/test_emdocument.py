@@ -192,6 +192,5 @@ class EmDocumentTest(unittest.TestCase):
   def test_override_document(self):
     self.assertTrue(isinstance(OverrideDocument._meta["prop"], NumberProperty))
 
-
 if __name__ == "__main__":
   unittest.main()

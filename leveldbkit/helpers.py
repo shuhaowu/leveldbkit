@@ -29,7 +29,8 @@ def walk_parents(parents, bases=("Document", "EmDocument", "type", "object")):
            ("Document", "type", "object")
 
   Returns:
-    A list of all the parents ordered via BFS.
+    A list of all the parents ordered via BFS. This means the first element is
+    the immediate parent..
   """
 
   frontier = parents

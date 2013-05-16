@@ -44,17 +44,17 @@ class EmDocumentMetaclass(type):
     if build_indexes:
       indexes = []
 
-    for name in attrs.keys():
-      if isinstance(attrs[name], BaseProperty):
-        meta[name] = attrs.pop(name)
-        if build_indexes and isinstance(meta[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and meta[name]._index:
-          indexes.append(name)
-
     all_parents = reversed(walk_parents(parents))
 
     for p_cls in all_parents:
       if hasattr(p_cls, "_meta"):
         meta.update(p_cls._meta)
+
+    for name in attrs.keys():
+      if isinstance(attrs[name], BaseProperty):
+        meta[name] = attrs.pop(name)
+        if build_indexes and isinstance(meta[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and meta[name]._index:
+          indexes.append(name)
 
     attrs["_meta"] = meta
     attrs["defined_properties"] = meta.keys()
