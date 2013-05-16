@@ -740,8 +740,9 @@ class Document(EmDocument):
           # we copy to make sure that there is no weird bug when we pop at
           # different points of the stack. Shallow copy is good enough as the
           # dicts themselves are readonly.
-          kwargs["expand"] = copy(expand)
-          d[name] = self[name].serialize(**kwargs)
+          if self[name] is not None:
+            kwargs["expand"] = copy(expand)
+            d[name] = self[name].serialize(**kwargs)
 
     if not dictionary:
       return json.dumps(d)

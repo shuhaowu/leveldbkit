@@ -294,7 +294,5 @@ class BasicDocumentTest(unittest.TestCase):
     serialized = doc.serialize(expand=[{}])
     self.assertTrue(isinstance(serialized["ref"], dict))
 
-
-
 if __name__ == "__main__":
   unittest.main()
