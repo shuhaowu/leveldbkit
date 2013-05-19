@@ -225,10 +225,13 @@ class EmDocument(object):
 
   def merge(self, data, merge_none=False):
     """Merge the data from a non-db source.
-    This method will treat all values with `None` as that it doesn't have
-    values unless `merge_none` is True. That is, if a value is None and the key
-    that it is associated to is defined as a property, the default value of that
-    property will be used unless `merge_none == True`.
+
+    This method treats all `None` values in data as if the key associated with
+    that `None` value is not even present. This will cause us to automatically
+    convert the value to that property's default value if available.
+
+    If None is indeed what you want to merge as oppose to the default value
+    for the property, set `merge_none` to `True`.
 
     Args:
       data: The data dictionary to merge into the object
@@ -736,13 +739,12 @@ class Document(EmDocument):
     if len(expand) > 0:
       kwargs = expand.pop(0)
       for name, attr in self._meta.iteritems():
-        if isinstance(attr, ReferenceProperty):
+        if isinstance(attr, ReferenceProperty) and name not in restricted and self[name] is not None:
           # we copy to make sure that there is no weird bug when we pop at
           # different points of the stack. Shallow copy is good enough as the
           # dicts themselves are readonly.
-          if self[name] is not None:
-            kwargs["expand"] = copy(expand)
-            d[name] = self[name].serialize(**kwargs)
+          kwargs["expand"] = copy(expand)
+          d[name] = self[name].serialize(**kwargs)
 
     if not dictionary:
       return json.dumps(d)

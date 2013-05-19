@@ -48,6 +48,19 @@
 </font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#StringProperty">StringProperty</a>
 </font></dt></dl>
 </dd>
+<dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#BaseProperty">BaseProperty</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#BooleanProperty">BooleanProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#DictProperty">DictProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#EmDocumentProperty">EmDocumentProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#EmDocumentsListProperty">EmDocumentsListProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#ListProperty">ListProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#NumberProperty">NumberProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#ReferenceProperty">ReferenceProperty</a>
+</font></dt><dt><font face="helvetica, arial"><a href="leveldbkit.properties.standard.html#StringProperty">StringProperty</a>
+</font></dt></dl>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -438,6 +451,72 @@ Returns:<br>
 
 <hr>
 Data descriptors inherited from <a href="leveldbkit.properties.standard.html#BaseProperty">BaseProperty</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><strong>Property</strong> = <a name="Property">class BaseProperty</a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Base&nbsp;property&nbsp;type<br>
+All&nbsp;property&nbsp;types&nbsp;are&nbsp;required&nbsp;to&nbsp;be&nbsp;extended&nbsp;from&nbsp;this&nbsp;class.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BaseProperty-__init__"><strong>__init__</strong></a>(self, required<font color="#909090">=False</font>, default<font color="#909090">=&lt;object object&gt;</font>, validators<font color="#909090">=[]</font>, load_on_demand<font color="#909090">=False</font>, index<font color="#909090">=False</font>)</dt><dd><tt>Initializes&nbsp;a&nbsp;new&nbsp;instance&nbsp;of&nbsp;a&nbsp;property.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;required:&nbsp;True&nbsp;or&nbsp;false,&nbsp;this&nbsp;will&nbsp;test&nbsp;for&nbsp;requiredness&nbsp;(None&nbsp;value&nbsp;will<br>
+&nbsp;&nbsp;not&nbsp;fly!)&nbsp;Defaults&nbsp;to&nbsp;False<br>
+&nbsp;&nbsp;default:&nbsp;a&nbsp;default&nbsp;value&nbsp;or&nbsp;a&nbsp;function&nbsp;that&nbsp;takes&nbsp;no&nbsp;argument&nbsp;that<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generates&nbsp;a&nbsp;default&nbsp;value.&nbsp;Defaults&nbsp;to&nbsp;None.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note:&nbsp;if&nbsp;you&nbsp;use&nbsp;this&nbsp;as&nbsp;a&nbsp;variable,&nbsp;passing&nbsp;an&nbsp;instance&nbsp;into<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;maybe&nbsp;hurtful&nbsp;as&nbsp;there's&nbsp;no&nbsp;deepcopying&nbsp;going&nbsp;on.&nbsp;If&nbsp;you&nbsp;want<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;default&nbsp;value&nbsp;of&nbsp;{},&nbsp;do&nbsp;default=lambda:&nbsp;{}<br>
+&nbsp;&nbsp;validators:&nbsp;A&nbsp;list&nbsp;of&nbsp;functions&nbsp;that&nbsp;takes&nbsp;in&nbsp;a&nbsp;value&nbsp;to&nbsp;validate.&nbsp;This<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;must&nbsp;return&nbsp;True&nbsp;or&nbsp;False.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note:&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;turn&nbsp;off&nbsp;validations,&nbsp;set&nbsp;this&nbsp;to&nbsp;None.<br>
+&nbsp;&nbsp;load_on_demand:&nbsp;A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;if&nbsp;we&nbsp;want&nbsp;to&nbsp;convert&nbsp;the&nbsp;value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;upon&nbsp;getting&nbsp;from&nbsp;the&nbsp;database&nbsp;or&nbsp;when&nbsp;it&nbsp;is&nbsp;first<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accessed.<br>
+&nbsp;&nbsp;index:&nbsp;A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;if&nbsp;this&nbsp;property&nbsp;should&nbsp;be&nbsp;indexed&nbsp;so<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;can&nbsp;be&nbsp;found&nbsp;using&nbsp;index.&nbsp;This&nbsp;is&nbsp;only&nbsp;valid&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#StringProperty">StringProperty</a>,&nbsp;<a href="#NumberProperty">NumberProperty</a>,&nbsp;<a href="#ListProperty">ListProperty</a>,&nbsp;and&nbsp;<a href="#ReferenceProperty">ReferenceProperty</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;Document.</tt></dd></dl>
+
+<dl><dt><a name="BaseProperty-default"><strong>default</strong></a>(self)</dt><dd><tt>Returns&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;the&nbsp;property.&nbsp;It&nbsp;will&nbsp;return&nbsp;either&nbsp;the<br>
+default&nbsp;value&nbsp;given&nbsp;(or&nbsp;generate&nbsp;one&nbsp;via&nbsp;the&nbsp;function)&nbsp;or&nbsp;the&nbsp;default&nbsp;for<br>
+that&nbsp;type</tt></dd></dl>
+
+<dl><dt><a name="BaseProperty-from_db"><strong>from_db</strong></a>(self, value)</dt><dd><tt>Converts&nbsp;a&nbsp;value&nbsp;from&nbsp;the&nbsp;database&nbsp;back&nbsp;into&nbsp;something&nbsp;we&nbsp;work&nbsp;with.<br>
+Called&nbsp;upon&nbsp;getting&nbsp;from&nbsp;the&nbsp;database.&nbsp;If&nbsp;self.<strong>load_on_demand</strong>&nbsp;is&nbsp;set&nbsp;to<br>
+True,&nbsp;this&nbsp;method&nbsp;will&nbsp;be&nbsp;called&nbsp;when&nbsp;first&nbsp;accessed&nbsp;instead&nbsp;of&nbsp;on&nbsp;db.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;value:&nbsp;Value&nbsp;from&nbsp;the&nbsp;database<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;Whatever&nbsp;that&nbsp;type&nbsp;wants&nbsp;to&nbsp;be&nbsp;once&nbsp;its&nbsp;in&nbsp;application&nbsp;code&nbsp;rather&nbsp;than<br>
+&nbsp;&nbsp;db.</tt></dd></dl>
+
+<dl><dt><a name="BaseProperty-to_db"><strong>to_db</strong></a>(self, value)</dt><dd><tt>Converts&nbsp;a&nbsp;value&nbsp;to&nbsp;a&nbsp;database&nbsp;friendly&nbsp;format.&nbsp;Called&nbsp;upon&nbsp;saving&nbsp;to&nbsp;the<br>
+database.<br>
+Args:<br>
+&nbsp;&nbsp;value:&nbsp;the&nbsp;value&nbsp;to&nbsp;be&nbsp;converted<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;Whatever&nbsp;that&nbsp;type&nbsp;wants&nbsp;to&nbsp;convert.&nbsp;Default&nbsp;does&nbsp;nothing.&nbsp;If&nbsp;you're<br>
+&nbsp;&nbsp;implementing&nbsp;this&nbsp;it&nbsp;needs&nbsp;to&nbsp;be&nbsp;JSON&nbsp;friendly.</tt></dd></dl>
+
+<dl><dt><a name="BaseProperty-validate"><strong>validate</strong></a>(self, value)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
