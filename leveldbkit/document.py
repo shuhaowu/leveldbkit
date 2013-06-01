@@ -234,7 +234,8 @@ class EmDocument(object):
     for the property, set `merge_none` to `True`.
 
     Args:
-      data: The data dictionary to merge into the object
+      data: The data dictionary, a json string, or a foreign document to merge
+            into the object.
       merge_none: Boolean. If set to True, None values will be merged as is
                   instead of being converted into the default value of that
                   property. Defaults to False.
