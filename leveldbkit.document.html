@@ -131,6 +131,24 @@ Args:<br>
 Returns:<br>
 &nbsp;&nbsp;self</tt></dd></dl>
 
+<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>, include_key<font color="#909090">=False</font>, expand<font color="#909090">=[]</font>)</dt><dd><tt>Serializes&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;Doc&nbsp;same&nbsp;as&nbsp;`<a href="#EmDocument">EmDocument</a>.serialize`&nbsp;except&nbsp;there<br>
+is&nbsp;an&nbsp;extra&nbsp;argument.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;Same&nbsp;as&nbsp;<a href="#EmDocument">EmDocument</a>&nbsp;other&nbsp;the&nbsp;following&nbsp;addition:<br>
+&nbsp;&nbsp;include_key:&nbsp;A&nbsp;boolean&nbsp;indicate&nbsp;if&nbsp;the&nbsp;key&nbsp;should&nbsp;be&nbsp;serialized&nbsp;under<br>
+&nbsp;&nbsp;"key".&nbsp;Defaults&nbsp;to&nbsp;False.<br>
+&nbsp;&nbsp;expand:&nbsp;Defaults&nbsp;to&nbsp;an&nbsp;empty&nbsp;list.&nbsp;If&nbsp;this&nbsp;list&nbsp;is&nbsp;empty,&nbsp;all&nbsp;reference<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property&nbsp;will&nbsp;be&nbsp;serialized&nbsp;as&nbsp;keys.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;list&nbsp;holds&nbsp;a&nbsp;list&nbsp;of&nbsp;dictionaries.&nbsp;These&nbsp;are&nbsp;the&nbsp;arguments&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;method&nbsp;without&nbsp;the&nbsp;`expand`.&nbsp;The&nbsp;number&nbsp;of&nbsp;arguments&nbsp;will&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;number&nbsp;of&nbsp;layers&nbsp;to&nbsp;expand&nbsp;down.&nbsp;For&nbsp;example,&nbsp;if&nbsp;there&nbsp;are&nbsp;two<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionaries&nbsp;of&nbsp;arguments,&nbsp;it&nbsp;will&nbsp;expand&nbsp;two&nbsp;levels&nbsp;down&nbsp;(that&nbsp;is,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;will&nbsp;look&nbsp;at&nbsp;any&nbsp;reference&nbsp;properties&nbsp;for&nbsp;the&nbsp;immediate&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;any&nbsp;reference&nbsp;properties&nbsp;of&nbsp;those&nbsp;objects).&nbsp;The&nbsp;order&nbsp;of&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;is&nbsp;so&nbsp;that&nbsp;level&nbsp;1&nbsp;would&nbsp;be&nbsp;the&nbsp;first&nbsp;argument,&nbsp;level&nbsp;2&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;second&nbsp;and&nbsp;so&nbsp;forth.</tt></dd></dl>
+
 <hr>
 Class methods defined here:<br>
 <dl><dt><a name="Document-delete_key"><strong>delete_key</strong></a>(cls, key, sync<font color="#909090">=False</font>, db<font color="#909090">=None</font>, batch<font color="#909090">=False</font>)<font color="#909090"><font face="helvetica, arial"> from <a href="leveldbkit.document.html#DocumentMetaclass">DocumentMetaclass</a></font></font></dt><dd><tt>Delete&nbsp;something&nbsp;from&nbsp;the&nbsp;database&nbsp;without&nbsp;loading&nbsp;it.<br>
@@ -260,33 +278,22 @@ Returns:<br>
 &nbsp;&nbsp;True&nbsp;or&nbsp;False</tt></dd></dl>
 
 <dl><dt><a name="Document-merge"><strong>merge</strong></a>(self, data, merge_none<font color="#909090">=False</font>)</dt><dd><tt>Merge&nbsp;the&nbsp;data&nbsp;from&nbsp;a&nbsp;non-db&nbsp;source.<br>
-This&nbsp;method&nbsp;will&nbsp;treat&nbsp;all&nbsp;values&nbsp;with&nbsp;`None`&nbsp;as&nbsp;that&nbsp;it&nbsp;doesn't&nbsp;have<br>
-values&nbsp;unless&nbsp;`merge_none`&nbsp;is&nbsp;True.&nbsp;That&nbsp;is,&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;None&nbsp;and&nbsp;the&nbsp;key<br>
-that&nbsp;it&nbsp;is&nbsp;associated&nbsp;to&nbsp;is&nbsp;defined&nbsp;as&nbsp;a&nbsp;property,&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
-property&nbsp;will&nbsp;be&nbsp;used&nbsp;unless&nbsp;`merge_none&nbsp;==&nbsp;True`.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;treats&nbsp;all&nbsp;`None`&nbsp;values&nbsp;in&nbsp;data&nbsp;as&nbsp;if&nbsp;the&nbsp;key&nbsp;associated&nbsp;with<br>
+that&nbsp;`None`&nbsp;value&nbsp;is&nbsp;not&nbsp;even&nbsp;present.&nbsp;This&nbsp;will&nbsp;cause&nbsp;us&nbsp;to&nbsp;automatically<br>
+convert&nbsp;the&nbsp;value&nbsp;to&nbsp;that&nbsp;property's&nbsp;default&nbsp;value&nbsp;if&nbsp;available.<br>
+&nbsp;<br>
+If&nbsp;None&nbsp;is&nbsp;indeed&nbsp;what&nbsp;you&nbsp;want&nbsp;to&nbsp;merge&nbsp;as&nbsp;oppose&nbsp;to&nbsp;the&nbsp;default&nbsp;value<br>
+for&nbsp;the&nbsp;property,&nbsp;set&nbsp;`merge_none`&nbsp;to&nbsp;`True`.<br>
 &nbsp;<br>
 Args:<br>
-&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary&nbsp;to&nbsp;merge&nbsp;into&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary,&nbsp;a&nbsp;json&nbsp;string,&nbsp;or&nbsp;a&nbsp;foreign&nbsp;document&nbsp;to&nbsp;merge<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;into&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;&nbsp;merge_none:&nbsp;Boolean.&nbsp;If&nbsp;set&nbsp;to&nbsp;True,&nbsp;None&nbsp;values&nbsp;will&nbsp;be&nbsp;merged&nbsp;as&nbsp;is<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;instead&nbsp;of&nbsp;being&nbsp;converted&nbsp;into&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property.&nbsp;Defaults&nbsp;to&nbsp;False.<br>
 Returns:<br>
 &nbsp;&nbsp;self</tt></dd></dl>
-
-<dl><dt><a name="Document-serialize"><strong>serialize</strong></a>(self, dictionary<font color="#909090">=True</font>, restricted<font color="#909090">=()</font>)</dt><dd><tt>Serializes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;into&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;all&nbsp;the&nbsp;proper&nbsp;conversions<br>
-&nbsp;<br>
-Args:<br>
-&nbsp;&nbsp;dictionary:&nbsp;boolean.&nbsp;If&nbsp;True,&nbsp;this&nbsp;will&nbsp;return&nbsp;a&nbsp;dictionary,&nbsp;otherwise&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dictionary&nbsp;will&nbsp;be&nbsp;dumped&nbsp;by&nbsp;json.<br>
-&nbsp;&nbsp;restricted:&nbsp;The&nbsp;properties&nbsp;to&nbsp;not&nbsp;output&nbsp;in&nbsp;the&nbsp;serialized&nbsp;output.&nbsp;Useful<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scenarios&nbsp;where&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;info&nbsp;from&nbsp;something.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;example&nbsp;would&nbsp;be&nbsp;you&nbsp;need&nbsp;to&nbsp;hide&nbsp;some&nbsp;sort&nbsp;of&nbsp;token&nbsp;from<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;user&nbsp;but&nbsp;you&nbsp;need&nbsp;to&nbsp;return&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;them,&nbsp;without<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;token.&nbsp;This&nbsp;defaults&nbsp;to&nbsp;tuple(),&nbsp;which&nbsp;means&nbsp;nothing&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;restricted.<br>
-Returns:<br>
-&nbsp;&nbsp;A&nbsp;plain&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;after&nbsp;all&nbsp;the&nbsp;conversion<br>
-&nbsp;&nbsp;to&nbsp;make&nbsp;it&nbsp;json&nbsp;friendly.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="leveldbkit.document.html#EmDocument">EmDocument</a>:<br>
@@ -475,13 +482,17 @@ Returns:<br>
 &nbsp;&nbsp;True&nbsp;or&nbsp;False</tt></dd></dl>
 
 <dl><dt><a name="EmDocument-merge"><strong>merge</strong></a>(self, data, merge_none<font color="#909090">=False</font>)</dt><dd><tt>Merge&nbsp;the&nbsp;data&nbsp;from&nbsp;a&nbsp;non-db&nbsp;source.<br>
-This&nbsp;method&nbsp;will&nbsp;treat&nbsp;all&nbsp;values&nbsp;with&nbsp;`None`&nbsp;as&nbsp;that&nbsp;it&nbsp;doesn't&nbsp;have<br>
-values&nbsp;unless&nbsp;`merge_none`&nbsp;is&nbsp;True.&nbsp;That&nbsp;is,&nbsp;if&nbsp;a&nbsp;value&nbsp;is&nbsp;None&nbsp;and&nbsp;the&nbsp;key<br>
-that&nbsp;it&nbsp;is&nbsp;associated&nbsp;to&nbsp;is&nbsp;defined&nbsp;as&nbsp;a&nbsp;property,&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
-property&nbsp;will&nbsp;be&nbsp;used&nbsp;unless&nbsp;`merge_none&nbsp;==&nbsp;True`.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;treats&nbsp;all&nbsp;`None`&nbsp;values&nbsp;in&nbsp;data&nbsp;as&nbsp;if&nbsp;the&nbsp;key&nbsp;associated&nbsp;with<br>
+that&nbsp;`None`&nbsp;value&nbsp;is&nbsp;not&nbsp;even&nbsp;present.&nbsp;This&nbsp;will&nbsp;cause&nbsp;us&nbsp;to&nbsp;automatically<br>
+convert&nbsp;the&nbsp;value&nbsp;to&nbsp;that&nbsp;property's&nbsp;default&nbsp;value&nbsp;if&nbsp;available.<br>
+&nbsp;<br>
+If&nbsp;None&nbsp;is&nbsp;indeed&nbsp;what&nbsp;you&nbsp;want&nbsp;to&nbsp;merge&nbsp;as&nbsp;oppose&nbsp;to&nbsp;the&nbsp;default&nbsp;value<br>
+for&nbsp;the&nbsp;property,&nbsp;set&nbsp;`merge_none`&nbsp;to&nbsp;`True`.<br>
 &nbsp;<br>
 Args:<br>
-&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary&nbsp;to&nbsp;merge&nbsp;into&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;&nbsp;data:&nbsp;The&nbsp;data&nbsp;dictionary,&nbsp;a&nbsp;json&nbsp;string,&nbsp;or&nbsp;a&nbsp;foreign&nbsp;document&nbsp;to&nbsp;merge<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;into&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;&nbsp;merge_none:&nbsp;Boolean.&nbsp;If&nbsp;set&nbsp;to&nbsp;True,&nbsp;None&nbsp;values&nbsp;will&nbsp;be&nbsp;merged&nbsp;as&nbsp;is<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;instead&nbsp;of&nbsp;being&nbsp;converted&nbsp;into&nbsp;the&nbsp;default&nbsp;value&nbsp;of&nbsp;that<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;property.&nbsp;Defaults&nbsp;to&nbsp;False.<br>
