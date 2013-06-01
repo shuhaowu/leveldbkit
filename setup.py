@@ -52,7 +52,7 @@ setup(
     packages=find_packages(),
     install_requires=[],
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Intended Audience :: Developers",
         "Topic :: Database",
