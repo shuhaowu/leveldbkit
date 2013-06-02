@@ -325,7 +325,6 @@ class EmDocument(object):
   __getitem__ = __getattr__
   __delitem__ = __delattr__
 
-
 class DocumentMetaclass(EmDocumentMetaclass):
   def __new__(cls, clsname, parents, attrs):
     attrs["_write_batch"] = WriteBatch()
@@ -772,3 +771,19 @@ class Document(EmDocument):
     else:
       db = cls._get_db(db)
       db.Delete(cls.key, sync)
+
+  def __eq__(self, other):
+    """Check equality. However, this only checks if the key are the same and
+    not the content. If the content is different and the key is the same this
+    will return True.
+
+    Args:
+      other: The other document
+
+    Returns:
+      True if the two document's key are the same, False otherwise.
+    """
+    if isinstance(other, Document):
+      return self.key == other.key
+
+    return False

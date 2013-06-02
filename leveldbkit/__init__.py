@@ -25,7 +25,7 @@ from .properties.standard import BaseProperty, BooleanProperty, DictProperty, Em
 from .properties.fancy import EnumProperty, DateTimeProperty, PasswordProperty
 
 # PEP 386 versioning
-VERSION = (0, 1, 1, "b")
+VERSION = (0, 1, 2, "b")
 __version__ = ('.'.join(map(str, VERSION[:3])) + '.'.join(VERSION[3:]))
 __author__ = "Shuhao Wu"
 __url__ = "https://github.com/shuhaowu/leveldbkit"

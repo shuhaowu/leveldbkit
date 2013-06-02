@@ -294,5 +294,13 @@ class BasicDocumentTest(unittest.TestCase):
     serialized = doc.serialize(expand=[{}])
     self.assertTrue(isinstance(serialized["ref"], dict))
 
+  def test_equal(self):
+    doc = SomeDocument("test")
+    doc_same = SomeDocument("test")
+    self.assertTrue(doc == doc_same)
+
+    doc2 = SomeDocument(key="test1")
+    self.assertFalse(doc == doc2)
+
 if __name__ == "__main__":
   unittest.main()
