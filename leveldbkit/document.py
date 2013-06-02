@@ -460,6 +460,9 @@ class Document(EmDocument):
     if not cls.indexdb:
       raise DatabaseError("indexdb is not defined for `{0}`".format(cls.__name__))
 
+    if field in ("$key", "$bucket"):
+      return
+
     if not (field and field in cls._meta and cls._meta[field]._index):
       raise DatabaseError("Field '{0}' is not indexed!".format(field))
 
@@ -481,6 +484,11 @@ class Document(EmDocument):
       DatabaseError if no index database is defined.
     """
     cls._ensure_indexdb_exists(field)
+
+    if field == "$bucket":
+      return [key for key, _ in cls.db.RangeIter()]
+    if field == "$key":
+      return [key for key, _ in cls.db.RangeIter(start_value, end_value)]
 
     if isinstance(cls._meta[field], NumberProperty):
       start_value = float(start_value)
@@ -516,27 +524,32 @@ class Document(EmDocument):
     """
     cls._ensure_indexdb_exists(field)
 
-    if isinstance(cls._meta[field], NumberProperty):
-      start_value = float(start_value)
-      if end_value is not None:
-        end_value = float(end_value)
-
-    if end_value is None:
-      try:
-        keys = json.loads(cls._get_indexdb().Get(_INDEX_KEY.format(f=field, v=start_value)))
-      except KeyError:
-        keys = []
-
-      for key in keys:
+    if field == "$bucket":
+      for key, _ in cls.db.RangeIter():
         yield cls(key).reload()
-
+    elif field == "$key":
+      for key, _ in cls.db.RangeIter(start_value, end_value):
+        yield cls(key).reload()
     else:
-      for index_value, keys in cls._get_indexdb().RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
-        keys = json.loads(keys)
+      if isinstance(cls._meta[field], NumberProperty):
+        start_value = float(start_value)
+        if end_value is not None:
+          end_value = float(end_value)
+
+      if end_value is None:
+        try:
+          keys = json.loads(cls._get_indexdb().Get(_INDEX_KEY.format(f=field, v=start_value)))
+        except KeyError:
+          keys = []
+
         for key in keys:
           yield cls(key).reload()
 
-
+      else:
+        for index_value, keys in cls._get_indexdb().RangeIter(_INDEX_KEY.format(f=field, v=start_value), _INDEX_KEY.format(f=field, v=end_value)):
+          keys = json.loads(keys)
+          for key in keys:
+            yield cls(key).reload()
 
   def clear(self, to_default=True):
     EmDocument.clear(self, to_default)

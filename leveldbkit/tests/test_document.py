@@ -302,5 +302,50 @@ class BasicDocumentTest(unittest.TestCase):
     doc2 = SomeDocument(key="test1")
     self.assertFalse(doc == doc2)
 
+  def test_index_keys(self):
+    SomeDocument("1").save()
+    SomeDocument("2").save()
+    SomeDocument("3").save()
+    SomeDocument("4").save()
+    SomeDocument("5").save()
+
+    keys = SomeDocument.index_keys_only("$key", "2", "4")
+    self.assertEquals(3, len(keys))
+    self.assertEquals("2", keys[0])
+    self.assertEquals("3", keys[1])
+    self.assertEquals("4", keys[2])
+
+    keys = SomeDocument.index("$key", "1", "4")
+    i = 1
+    for doc in keys:
+      self.assertEqual(str(i), doc.key)
+      i += 1
+
+    self.assertEquals(5, i)
+
+  def test_index_buckets(self):
+    SomeDocument("1").save()
+    SomeDocument("2").save()
+    SomeDocument("3").save()
+    SomeDocument("4").save()
+    SomeDocument("5").save()
+
+    # since we have no buckets, we need to pass in a value. None will do.
+    keys = SomeDocument.index_keys_only("$bucket", None)
+    self.assertEquals(5, len(keys))
+
+    self.assertEqual("1", keys[0])
+    self.assertEqual("2", keys[1])
+    self.assertEqual("3", keys[2])
+    self.assertEqual("4", keys[3])
+    self.assertEqual("5", keys[4])
+
+    i = 1
+    for doc in SomeDocument.index("$bucket", None):
+      self.assertEqual(str(i), doc.key)
+      i += 1
+
+    self.assertEquals(6, i)
+
 if __name__ == "__main__":
   unittest.main()
