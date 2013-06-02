@@ -6,9 +6,8 @@ before_install:
   - "cd py-leveldb-read-only"
   - "./compile_leveldb.sh"
   - "python setup.py build"
-  - "sudo python setup.py install"
+  - "python setup.py install"
   - "cd .."
 install:
   - "pip install . --use-mirrors"
-  - "pip install leveldb"
 script: nosetests
