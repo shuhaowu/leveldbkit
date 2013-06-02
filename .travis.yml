@@ -2,12 +2,10 @@ language: python
 python:
   - "2.7"
 before_install:
-  - "svn checkout http://py-leveldb.googlecode.com/svn/trunk/ py-leveldb-read-only"
-  - "cd py-leveldb-read-only"
-  - "./compile_leveldb.sh"
-  - "python setup.py build"
-  - "sudo python setup.py install"
-  - "cd .."
+  - "svn checkout http://py-leveldb.googlecode.com/svn/trunk/ leveldb"
+  - "./leveldb/compile_leveldb.sh"
+  - "python leveldb/setup.py build"
+  - "sudo python leveldb/setup.py install"
 install:
   - "pip install . --use-mirrors"
 script: nosetests
