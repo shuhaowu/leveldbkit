@@ -39,7 +39,8 @@ from ..properties.standard import (
 from ..properties.fancy import (
   EnumProperty,
   DateTimeProperty,
-  PasswordProperty
+  PasswordProperty,
+  hash_password
 )
 
 from ..exceptions import ValidationError
@@ -267,7 +268,14 @@ class FancyPropertiesTest(unittest.TestCase):
     self.assertEquals(None, prop.default())
 
   def test_passwordprop(self):
-    raise NotImplementedError
+    prop = PasswordProperty()
+    pw = prop.on_set("password")
+    self.assertTrue("salt" in pw)
+    self.assertTrue("hash" in pw)
+
+    # TODO: security tests?
+    self.assertEquals(hash_password("password", pw["salt"]), pw["hash"])
+
 
 if __name__ == "__main__":
   unittest.main()

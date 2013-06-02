@@ -1,6 +1,8 @@
 Leveldbkit
 ==========
 
+[![Build Status](https://travis-ci.org/shuhaowu/leveldbkit.png)](https://travis-ci.org/shuhaowu/leveldbkit)
+
 Leveldbkit is an object mapper that for leveldb that also has secondary indexes!
 This means it adds bloat and complexity to leveldb so use at your own risk!
 
