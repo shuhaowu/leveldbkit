@@ -379,6 +379,7 @@ class Document(EmDocument):
   def _flush_indexes(cls, sync=True):
     if cls._index_write_needed:
       cls._get_indexdb().Write(cls._indexdb_write_batch, sync=sync)
+      cls._indexdb_write_batch = WriteBatch()
       cls._index_write_needed = False
 
   @classmethod
