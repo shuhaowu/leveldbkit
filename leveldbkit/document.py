@@ -330,8 +330,7 @@ class DocumentMetaclass(EmDocumentMetaclass):
     attrs["_write_batch"] = WriteBatch()
     attrs["_index_write_needed"] = False
 
-    if "indexdb" in attrs and attrs["indexdb"] is not None:
-      attrs["_indexdb_write_batch"] = WriteBatch()
+    attrs["_indexdb_write_batch"] = WriteBatch()
 
     return EmDocumentMetaclass.__new__(cls, clsname, parents, attrs, True)
 
