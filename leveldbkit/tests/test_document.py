@@ -62,9 +62,11 @@ class DocumentLater(Document):
 
 class Mixin(EmDocument):
   test = StringProperty(validators=lambda v: v == "test")
+  test_index = StringProperty(index=True)
 
 class DocumentWithMixin(Document, Mixin):
   db = leveldb.LevelDB("{0}/mixin.db".format(test_dir))
+  indexdb = leveldb.LevelDB("{0}/test_mixin_index.db".format(test_dir))
 
 class BasicDocumentTest(unittest.TestCase):
   def setUp(self):
@@ -120,6 +122,16 @@ class BasicDocumentTest(unittest.TestCase):
 
     with self.assertRaises(NotFoundError):
       SomeDocument.get(doc.key)
+
+  def test_document_mixin_indexes_inheritance(self):
+    doc = DocumentWithMixin()
+    doc.test = "test"
+    doc.test_index = "a"
+    doc.save()
+    self.cleanups.append(doc)
+    keys = DocumentWithMixin.index_keys_only("test_index", "a")
+    self.assertEquals(1, len(keys))
+    self.assertEquals(doc.key, keys[0])
 
   def test_document_mixin(self):
     doc = DocumentWithMixin()

@@ -36,14 +36,13 @@ from .exceptions import ValidationError, NotFoundError, DatabaseError
 from leveldb import WriteBatch, LevelDB
 
 class EmDocumentMetaclass(type):
-  def __new__(cls, clsname, parents, attrs, build_indexes=False):
+  def __new__(cls, clsname, parents, attrs):
     if clsname in ("Document", "EmDocument"):
       return type.__new__(cls, clsname, parents, attrs)
 
     meta = {}
 
-    if build_indexes:
-      indexes = []
+    indexes = []
 
     all_parents = reversed(walk_parents(parents))
 
@@ -51,16 +50,18 @@ class EmDocumentMetaclass(type):
       if hasattr(p_cls, "_meta"):
         meta.update(p_cls._meta)
 
+      if hasattr(p_cls, "_indexes"):
+        indexes += list(p_cls._indexes)
+
     for name in attrs.keys():
       if isinstance(attrs[name], BaseProperty):
         meta[name] = attrs.pop(name)
-        if build_indexes and isinstance(meta[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and meta[name]._index:
+        if isinstance(meta[name], (StringProperty, NumberProperty, ListProperty, ReferenceProperty)) and meta[name]._index:
           indexes.append(name)
 
     attrs["_meta"] = meta
     attrs["defined_properties"] = meta.keys()
-    if build_indexes:
-      attrs["_indexes"] = indexes
+    attrs["_indexes"] = indexes
     return type.__new__(cls, clsname, parents, attrs)
 
   def __getattr__(self, name):
@@ -332,7 +333,7 @@ class DocumentMetaclass(EmDocumentMetaclass):
 
     attrs["_indexdb_write_batch"] = WriteBatch()
 
-    return EmDocumentMetaclass.__new__(cls, clsname, parents, attrs, True)
+    return EmDocumentMetaclass.__new__(cls, clsname, parents, attrs)
 
 _INDEX_KEY = "{f}~{v}"
 
