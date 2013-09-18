@@ -285,7 +285,7 @@ class EmDocument(object):
       name: name of the attribute
       value: the value of that attribute to set to.
     """
-    if name[0] == "_":
+    if name[0] == "_" or name == "key":
       self.__dict__[name] = value
       return
 

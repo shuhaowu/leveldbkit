@@ -335,6 +335,13 @@ class BasicDocumentTest(unittest.TestCase):
 
     self.assertEquals(5, i)
 
+  def test_set_key(self):
+    doc = SomeDocument()
+    k = doc.key
+    doc.key = "hello"
+    self.assertNotEquals(k, doc.key)
+    self.assertEquals("hello", doc.key)
+
   def test_index_buckets(self):
     SomeDocument("1").save()
     SomeDocument("2").save()
